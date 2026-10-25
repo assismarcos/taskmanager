@@ -21,9 +21,7 @@ describe('authInterceptor', () => {
   });
 
   function signIn(): void {
-    TestBed.inject(AuthService)
-      .login({ email: 'ann@mail.com', password: 'secret123' })
-      .subscribe();
+    TestBed.inject(AuthService).login({ email: 'ann@mail.com', password: 'secret123' }).subscribe();
     controller.expectOne('/api/auth/login').flush({
       accessToken: 'token-1',
       expiresAt: new Date(Date.now() + 60_000).toISOString(),
