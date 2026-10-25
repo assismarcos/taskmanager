@@ -128,7 +128,7 @@ Index `ix_tasks_user_id_status_due_date` on `(user_id, status, due_date)` serves
 | Due date ≥ today (UTC) **on create only** | `CreateTaskRequestValidator` (with `TimeProvider`) + `TaskItem.Create` invariant (with `now`) | AC-5 |
 | Status transitions: Todo ⇄ InProgress, Todo/InProgress → Done, Done → Todo only; same status is a no-op | `TaskItem.CanChangeStatusTo` / `ChangeStatus` (throws on Done → InProgress); `TaskService` returns `task.invalid_status_transition` first | AC-6 |
 | Status value must be a defined enum value | Validators (`IsInEnum`) | AC-6 |
-| Page ≥ 1, pageSize 1–50 | `TaskListQueryValidator` | AC-7 |
+| Page 1–10000 (at most 10000 keeps `(page - 1) * pageSize` from overflowing), pageSize 1–50 | `TaskListQueryValidator` | AC-7 |
 | Order by `due_date`, then `created_at`, then `id` (stable pages) | `TaskRepository.ListAsync` (`AsNoTracking`) | AC-7 |
 | Overdue = status ≠ Done and `DueDate < today` | `TaskItem.IsOverdue(today)` | AC-8 |
 | `UpdatedAt` changes on every update and status change | `TaskItem` | — |
