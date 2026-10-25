@@ -6,18 +6,11 @@ internal sealed class TaskItemBuilder
 {
     public static readonly DateTimeOffset DefaultNow = new(2026, 6, 15, 10, 0, 0, TimeSpan.Zero);
 
-    private Guid _userId = Guid.CreateVersion7();
     private string _title = "Write report";
     private string? _description = "Quarterly numbers";
-    private DateOnly _dueDate = DateOnly.FromDateTime(DefaultNow.UtcDateTime).AddDays(7);
+    private DateOnly? _dueDate;
     private TaskItemStatus _status = TaskItemStatus.Todo;
     private DateTimeOffset _now = DefaultNow;
-
-    public TaskItemBuilder WithUserId(Guid userId)
-    {
-        _userId = userId;
-        return this;
-    }
 
     public TaskItemBuilder WithTitle(string title)
     {
@@ -43,11 +36,15 @@ internal sealed class TaskItemBuilder
         return this;
     }
 
-    public TaskItemBuilder CreatedAt(DateTimeOffset now)
+    public TaskItemBuilder WithNow(DateTimeOffset now)
     {
         _now = now;
         return this;
     }
 
-    public TaskItem Build() => TaskItem.Create(_userId, _title, _description, _dueDate, _status, _now);
+    public TaskItem Build()
+    {
+        var dueDate = _dueDate ?? DateOnly.FromDateTime(_now.UtcDateTime).AddDays(7);
+        return TaskItem.Create(Guid.CreateVersion7(), _title, _description, dueDate, _status, _now);
+    }
 }
