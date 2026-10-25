@@ -9,7 +9,7 @@ namespace TaskManager.Infrastructure.IntegrationTests.Persistence;
 [Trait("Category", "Integration")]
 public sealed class ResetTests(PostgresFixture fixture)
 {
-    private static readonly DateTimeOffset Now = new(2026, 1, 15, 10, 0, 0, TimeSpan.Zero);
+    private static readonly DateTimeOffset _now = new(2026, 1, 15, 10, 0, 0, TimeSpan.Zero);
 
     [Fact]
     public async Task ResetAsync_RemovesAllRows()
@@ -17,9 +17,9 @@ public sealed class ResetTests(PostgresFixture fixture)
         // Arrange
         await using (var seed = fixture.CreateContext())
         {
-            var user = User.Create("Ana", "ana@example.com", "hash", Now);
+            var user = User.Create("Ana", "ana@example.com", "hash", _now);
             seed.Users.Add(user);
-            seed.Tasks.Add(TaskItem.Create(user.Id, "Write report", "Quarterly", new DateOnly(2026, 2, 1), TaskItemStatus.Todo, Now));
+            seed.Tasks.Add(TaskItem.Create(user.Id, "Write report", "Quarterly", new DateOnly(2026, 2, 1), TaskItemStatus.Todo, _now));
             await seed.SaveChangesAsync(TestContext.Current.CancellationToken);
         }
 

@@ -11,6 +11,7 @@ public sealed class MigrationTests(PostgresFixture fixture)
     public async Task Migrations_ApplyToEmptyDatabase()
     {
         // Arrange
+        await fixture.ResetAsync();
         await using var context = fixture.CreateContext();
 
         // Act

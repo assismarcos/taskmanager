@@ -10,7 +10,7 @@ namespace TaskManager.Infrastructure.IntegrationTests.Persistence;
 [Trait("Category", "Integration")]
 public sealed class ConstraintTests(PostgresFixture fixture) : IAsyncLifetime
 {
-    private static readonly DateTimeOffset Now = new(2026, 1, 15, 10, 0, 0, TimeSpan.Zero);
+    private static readonly DateTimeOffset _now = new(2026, 1, 15, 10, 0, 0, TimeSpan.Zero);
 
     public async ValueTask InitializeAsync() => await fixture.ResetAsync();
 
@@ -21,9 +21,9 @@ public sealed class ConstraintTests(PostgresFixture fixture) : IAsyncLifetime
     {
         // Arrange
         await using var context = fixture.CreateContext();
-        context.Users.Add(User.Create("Ana", "ana@example.com", "hash", Now));
+        context.Users.Add(User.Create("Ana", "ana@example.com", "hash", _now));
         await context.SaveChangesAsync(TestContext.Current.CancellationToken);
-        context.Users.Add(User.Create("Ana Two", "ana@example.com", "hash", Now));
+        context.Users.Add(User.Create("Ana Two", "ana@example.com", "hash", _now));
 
         // Act
         var exception = await Should.ThrowAsync<DbUpdateException>(() => context.SaveChangesAsync(TestContext.Current.CancellationToken));
@@ -39,7 +39,7 @@ public sealed class ConstraintTests(PostgresFixture fixture) : IAsyncLifetime
     {
         // Arrange
         await using var context = fixture.CreateContext();
-        var orphan = TaskItem.Create(Guid.NewGuid(), "Orphan task", null, new DateOnly(2026, 2, 1), TaskItemStatus.Todo, Now);
+        var orphan = TaskItem.Create(Guid.NewGuid(), "Orphan task", null, new DateOnly(2026, 2, 1), TaskItemStatus.Todo, _now);
         context.Tasks.Add(orphan);
 
         // Act
