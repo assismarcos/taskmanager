@@ -1,15 +1,18 @@
 using Microsoft.EntityFrameworkCore;
 using TaskManager.Domain.Tasks;
 using TaskManager.Domain.Users;
-using TaskManager.Infrastructure.IntegrationTests.Fixtures;
 
-namespace TaskManager.Infrastructure.IntegrationTests.Persistence;
+namespace TaskManager.Infrastructure.IntegrationTests.Fixtures;
 
 [Collection("Postgres")]
 [Trait("Category", "Integration")]
-public sealed class ResetTests(PostgresFixture fixture)
+public sealed class PostgresFixtureTests(PostgresFixture fixture) : IAsyncLifetime
 {
     private static readonly DateTimeOffset _now = new(2026, 1, 15, 10, 0, 0, TimeSpan.Zero);
+
+    public async ValueTask InitializeAsync() => await fixture.ResetAsync();
+
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 
     [Fact]
     public async Task ResetAsync_RemovesAllRows()
@@ -30,5 +33,19 @@ public sealed class ResetTests(PostgresFixture fixture)
         await using var context = fixture.CreateContext();
         (await context.Users.CountAsync(TestContext.Current.CancellationToken)).ShouldBe(0);
         (await context.Tasks.CountAsync(TestContext.Current.CancellationToken)).ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task ResetAsync_KeepsMigrationHistory()
+    {
+        // Arrange
+        await using var context = fixture.CreateContext();
+
+        // Act
+        await fixture.ResetAsync();
+
+        // Assert
+        var applied = await context.Database.GetAppliedMigrationsAsync(TestContext.Current.CancellationToken);
+        applied.ShouldBe(context.Database.GetMigrations());
     }
 }

@@ -48,5 +48,6 @@ public sealed class ConstraintTests(PostgresFixture fixture) : IAsyncLifetime
         // Assert
         var postgres = exception.InnerException.ShouldBeOfType<PostgresException>();
         postgres.SqlState.ShouldBe(PostgresErrorCodes.ForeignKeyViolation);
+        postgres.ConstraintName.ShouldBe("fk_tasks_users_user_id");
     }
 }
