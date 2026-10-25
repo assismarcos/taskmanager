@@ -4,7 +4,7 @@
 - Date: 2026-10-25
 
 ## Context
-The frontend has two features (auth and tasks) with modest shared state: the current user, the task page, the filter and the loading/error flags. It must be responsive and easy for a reviewer to follow. Angular 22 generates standalone, zoneless, signal-based apps by default.
+The frontend has two features (auth and tasks) with modest shared state: the current user, the task page, the filter and the loading/error flags. It must be responsive and easy for a reviewer to follow. Angular 21 (the newest major that runs on the machine's Node 22.22.0, DD-03 section 7) generates standalone, signal-based apps with Vitest by default, and supports zoneless.
 
 ## Decision
 Each feature has one store: an injectable service holding state in `signal()` and `computed()` and exposing intention-revealing methods (`load()`, `create()`, ...). API services only do HTTP. Components read signals and call store methods. Angular Material provides the components and responsive building blocks (`BreakpointObserver`, `mat-table`, cards, datepicker, dialog, snackbar).

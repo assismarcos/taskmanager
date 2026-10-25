@@ -13,8 +13,8 @@ conversation: the task file, `docs/design/DD-03-frontend.md`, the ADRs it lists,
 `docs/spec/user-story.md` and `CLAUDE.md` are your whole brief.
 
 1. Read the task file, then the design doc sections, ADRs and acceptance criteria it cites.
-2. Check Node: `node --version` must be ≥ 22.22 (the machine has 22.22.0). If not, stop and report. Never
-   change the Node version and never install anything globally: Angular CLI 22 is a project dependency, so
+2. Check Node: `node --version` must be ≥ 22.12 (the machine has 22.22.0). If not, stop and report. Never
+   change the Node version and never install anything globally: Angular CLI 21 is a project dependency, so
    use `npm run …` or `npx ng …` inside `frontend/`, never the global `ng` (it is a different version).
 3. Create your branch: `git switch -c feat/<task-id>-<slug>` (for example `feat/T24-frontend-auth`).
 4. Install dependencies once with `cd frontend && npm ci` (except in T12, which creates the workspace).

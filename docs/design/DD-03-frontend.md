@@ -7,7 +7,7 @@
 
 ## 1. Goal and scope
 
-An Angular 22 single-page app that consumes both APIs. It provides login and register screens, a task list with status filter and pagination, one create/edit form, and delete with confirmation. It works at desktop and mobile widths, and the browser console stays clean.
+An Angular 21 single-page app that consumes both APIs. It provides login and register screens, a task list with status filter and pagination, one create/edit form, and delete with confirmation. It works at desktop and mobile widths, and the browser console stays clean.
 
 Out of scope: offline mode, i18n, theme switching, push notifications. An end-to-end Playwright test is optional and is the first thing cut if time is short. Its browser download goes to the user profile, outside the project, so it needs the developer's approval first.
 
@@ -120,8 +120,8 @@ Vitest (the Angular CLI default) with `TestBed` and `HttpTestingController`. Spe
 
 ## 7. Risks and open questions
 
-- Angular 22 is recent (June 2026): Vitest and zoneless are the defaults, and Angular Material 22 APIs need to be confirmed while implementing T12. Angular 22 requires Node `^22.22 || ^24.13.1 || >=26`. The installed Node 22.22.0 meets that minimum, so the local toolchain is not changed. Docker uses `node:22-alpine`.
-- **The global environment must not change.** The machine keeps Node 22.22.0 and a global Angular CLI 17.3.8. Angular 22 lives only in `frontend/node_modules`: the workspace is created with `npx --yes @angular/cli@22 new …` and every later command runs through `npm run` or `npx ng`. `NG_CLI_ANALYTICS=false` prevents the analytics prompt from writing to the global Angular config. `.claude/settings.json` denies global installs and the global `ng`.
+- **Angular 21, not 22.** Every Angular 22 release (22.0.0 to 22.2.4) requires Node `^22.22.3 || ^24.15.0 || >=26`, and the machine's Node 22.22.0 must not change. Angular 21 (21.2.x, still receiving patches) requires Node `^20.19.0 || ^22.12.0 || >=24`, and keeps everything this design relies on: standalone components, signals, zoneless and Vitest as the default test runner. Upgrade path once Node is upgraded: `npx ng update @angular/core@22 @angular/cli@22`. Docker uses `node:22-alpine`.
+- **The global environment must not change.** The machine keeps Node 22.22.0 and a global Angular CLI 17.3.8. Angular 21 lives only in `frontend/node_modules`: the workspace is created with `npx --yes @angular/cli@21 new …` and every later command runs through `npm run` or `npx ng`. `NG_CLI_ANALYTICS=false` prevents the analytics prompt from writing to the global Angular config. `.claude/settings.json` denies global installs and the global `ng`.
 - The UTC "today" can block picking today's local date late in the evening west of UTC. This is accepted and documented, and the API behaves the same way.
 - The session is lost when the tab closes (`sessionStorage`). Accepted in ADR-0010.
 

@@ -13,7 +13,7 @@ every change must be easy to explain in a code review.
 ## Repository layout
 - `backend/` — `TaskManager.slnx`, `Directory.Build.props`, `Directory.Packages.props`,
   `src/` (Domain, Application, Infrastructure, Api) and `tests/` (six test projects)
-- `frontend/` — Angular 22 app: `src/app/core`, `shared`, `layout`, `features`
+- `frontend/` — Angular 21 app: `src/app/core`, `shared`, `layout`, `features`
 - `docs/` — spec, design, adr, tasks, genai
 - `.claude/` — `settings.json` (enforced), `rules/` (path-scoped conventions), `agents/`, `skills/`
 
@@ -24,7 +24,7 @@ every change must be easy to explain in a code review.
 - Format: `dotnet format backend/TaskManager.slnx` (CI uses `--verify-no-changes`)
 - New migration: `dotnet ef migrations add <Name> --project backend/src/TaskManager.Infrastructure --output-dir Persistence/Migrations`
 - Frontend: `cd frontend && npm test` / `npm run lint` / `npm run build`
-  (Angular CLI 22 is a project dependency: use `npm run …` or `npx ng …`, never the global `ng`)
+  (Angular CLI 21 is a project dependency: use `npm run …` or `npx ng …`, never the global `ng`)
 - Full stack: `docker compose up --build` — app :4200, API :5080, API reference :5080/scalar
 
 These commands work once T00 (backend) and T12 (frontend) are merged.
