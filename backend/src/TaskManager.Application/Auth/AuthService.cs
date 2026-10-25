@@ -1,6 +1,7 @@
 using FluentValidation;
 using TaskManager.Application.Abstractions;
 using TaskManager.Application.Common;
+using TaskManager.Domain.Users;
 
 namespace TaskManager.Application.Auth;
 
@@ -13,15 +14,56 @@ public sealed class AuthService(
     IValidator<LoginRequest> loginValidator,
     TimeProvider timeProvider) : IAuthService
 {
-    private readonly object[] _unused =
-        [users, passwordHasher, tokenService, currentUser, registerValidator, loginValidator, timeProvider];
+    private static readonly Error InvalidCredentials = new(
+        ErrorType.Unauthorized, "auth.invalid_credentials", "Invalid email or password");
 
-    public Task<Result<UserResponse>> RegisterAsync(RegisterRequest request, CancellationToken ct) =>
-        throw new NotImplementedException();
+    public async Task<Result<UserResponse>> RegisterAsync(RegisterRequest request, CancellationToken ct)
+    {
+        var validation = await registerValidator.ValidateAsync(request, ct);
+        if (!validation.IsValid)
+        {
+            return validation.ToError();
+        }
 
-    public Task<Result<LoginResponse>> LoginAsync(LoginRequest request, CancellationToken ct) =>
-        throw new NotImplementedException();
+        var passwordHash = passwordHasher.Hash(request.Password);
+        var user = User.Create(request.Name, request.Email, passwordHash, timeProvider.GetUtcNow());
 
-    public Task<Result<UserResponse>> GetCurrentUserAsync(CancellationToken ct) =>
-        throw new NotImplementedException();
+        if (!await users.TryAddAsync(user, ct))
+        {
+            return new Error(ErrorType.Conflict, "auth.email_taken", "Email is already registered.");
+        }
+
+        return ToResponse(user);
+    }
+
+    public async Task<Result<LoginResponse>> LoginAsync(LoginRequest request, CancellationToken ct)
+    {
+        var validation = await loginValidator.ValidateAsync(request, ct);
+        if (!validation.IsValid)
+        {
+            return validation.ToError();
+        }
+
+        var normalizedEmail = request.Email.Trim().ToLowerInvariant();
+        var user = await users.GetByEmailAsync(normalizedEmail, ct);
+
+        // Same error for an unknown email and a wrong password (AC-2).
+        if (user is null || !passwordHasher.Verify(user.PasswordHash, request.Password))
+        {
+            return InvalidCredentials;
+        }
+
+        var token = tokenService.CreateToken(user);
+        return new LoginResponse(token.Token, token.ExpiresAt, ToResponse(user));
+    }
+
+    public async Task<Result<UserResponse>> GetCurrentUserAsync(CancellationToken ct)
+    {
+        var user = await users.GetByIdAsync(currentUser.UserId, ct);
+
+        // A valid token for a deleted user must not grant access (AC-9).
+        return user is null ? InvalidCredentials : ToResponse(user);
+    }
+
+    private static UserResponse ToResponse(User user) => new(user.Id, user.Name, user.Email);
 }

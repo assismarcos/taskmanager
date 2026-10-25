@@ -51,6 +51,7 @@ public sealed class AuthServiceTests
     public async Task Register_WhenEmailIsTaken_ReturnsConflict()
     {
         // Arrange
+        _hasher.Hash(Arg.Any<string>()).Returns("hashed");
         _users.TryAddAsync(Arg.Any<User>(), Arg.Any<CancellationToken>()).Returns(false);
 
         // Act
