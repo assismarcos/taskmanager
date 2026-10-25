@@ -1,10 +1,16 @@
+using Microsoft.AspNetCore.Identity;
 using TaskManager.Application.Abstractions;
+using TaskManager.Domain.Users;
 
 namespace TaskManager.Infrastructure.Authentication;
 
 public sealed class PasswordHasher : IPasswordHasher
 {
-    public string Hash(string password) => throw new NotImplementedException();
+    private readonly PasswordHasher<User> _inner = new();
 
-    public bool Verify(string passwordHash, string password) => throw new NotImplementedException();
+    // The default implementation ignores the user argument.
+    public string Hash(string password) => _inner.HashPassword(null!, password);
+
+    public bool Verify(string passwordHash, string password) =>
+        _inner.VerifyHashedPassword(null!, passwordHash, password) != PasswordVerificationResult.Failed;
 }
