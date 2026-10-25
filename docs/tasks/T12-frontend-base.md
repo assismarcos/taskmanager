@@ -6,16 +6,16 @@
 - Design: `docs/design/DD-03-frontend.md`
 
 ## Goal
-Create the Angular 22 workspace with Material, linting, the shell layout, the API models and the dev proxy, ready for the auth and tasks features.
+Create the Angular 21 workspace with Material, linting, the shell layout, the API models and the dev proxy, ready for the auth and tasks features.
 
 ## Context
 - Design: DD-03 sections 2 (structure and routes), 3 (models), 6 (tests), 7 (versions)
 - ADRs: ADR-0009, ADR-0010
 - Contracts: `docs/api.md` (from T02)
-- Node: use the installed 22.22.0 as is (Angular 22 requires `^22.22 || ^24.13.1 || >=26`). Never run `nvm`.
+- Node: use the installed 22.22.0 as is. Angular 21 requires `^20.19.0 || ^22.12.0 || >=24`; Angular 22 would need ≥ 22.22.3 (DD-03 section 7). Never run `nvm`.
 - **Global environment must stay untouched** (DD-03 section 7). The machine's global Angular CLI 17.3.8 is never used or changed. Create the workspace from the repo root with the project-local CLI and no prompts:
-  `NG_CLI_ANALYTICS=false npx --yes @angular/cli@22 new frontend --skip-git --style=scss --ssr=false --interactive=false`
-  After that, run every command inside `frontend/` through `npm run …` or `npx ng …`. Examples: `npx ng add @angular/material --skip-confirmation`, `npx ng add angular-eslint --skip-confirmation`.
+  `NG_CLI_ANALYTICS=false npx --yes @angular/cli@21 new frontend --skip-git --style=scss --ssr=false --zoneless --ai-config=none --interactive=false`
+  After that, run every command inside `frontend/` through `npm run …` or `npx ng …`, pinned to the same major: `npx ng add @angular/material@21 --skip-confirmation --defaults`, `npx ng add angular-eslint@21 --skip-confirmation --defaults`.
 
 ## Scope — files you may create or change
 - `frontend/**` **except** `src/app/core/auth/**`, `src/app/core/http/**`, `src/app/features/**`, `src/app/shared/ui/**`
@@ -33,7 +33,7 @@ Create the Angular 22 workspace with Material, linting, the shell layout, the AP
 - [ ] Tests above written first, then passing (`npm test`)
 - [ ] `npm run lint` and `npm run build` clean; `ng serve` shows the shell with no console errors
 - [ ] Standalone, zoneless, `OnPush`, `inject()`, per `.claude/rules/angular.md`
-- [ ] Global environment unchanged, compared with a snapshot taken before starting: `node --version` (22.22.0), `ng version` outside the repo (CLI 17.3.8), `npm ls -g --depth=0`
+- [ ] Global environment unchanged, compared with a snapshot taken before starting: `node --version` (22.22.0), the global `@angular/cli` package version (17.3.8) and the list of global npm packages, read from `npm config get prefix`
 - [ ] Only files inside Scope changed
 - [ ] Conventional commits: `test(web)` → `feat(web)` → `refactor(web)`
 - [ ] Final report: files changed, tests added, versions used, open questions
