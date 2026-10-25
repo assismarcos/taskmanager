@@ -62,7 +62,7 @@ Errors: **400** email or password missing, **401** `detail: "Invalid email or pa
 
 Requires a token. Returns the user the token belongs to.
 
-**200 OK**: the same body as register. Errors: **401**.
+**200 OK**: the same body as register. Errors: **401** (no token, an invalid token, or `auth.invalid_token` when the user in the token no longer exists).
 
 ### `GET /api/auth/status`
 
@@ -180,6 +180,7 @@ Error catalog. The code is the `Error.Code` used in the Application layer and in
 | `validation` | 400 | Input fails validation; field errors in `errors` |
 | `auth.email_taken` | 409 | Registering an email that already exists |
 | `auth.invalid_credentials` | 401 | Unknown email or wrong password |
+| `auth.invalid_token` | 401 | The user in the token no longer exists (`/me`) |
 | `task.not_found` | 404 | The task does not exist or belongs to another user |
 | `task.invalid_status_transition` | 400 | Changing a `Done` task to `InProgress` |
 
