@@ -13,10 +13,12 @@ Implement CRUD use cases for tasks, enforcing ownership, validation, status tran
 - Design: DD-02 sections 2, 3, 5 and 6
 - ADRs: ADR-0002, ADR-0006, ADR-0007
 - Contracts: `ITaskService`, DTOs, `ITaskRepository`, `ICurrentUser` (on `main`)
+- Validators check the **trimmed** title and description lengths, as `TaskItem` does. Otherwise a title such as `" ab "` passes validation and the domain throws, and a `DomainException` reaching the API is a bug (DD-02 section 3).
 
 ## Scope — files you may create or change
 - `backend/src/TaskManager.Application/Tasks/**` (including `TaskResponse.FromEntity`)
 - `backend/tests/TaskManager.Application.UnitTests/Tasks/**`
+- `backend/tests/TaskManager.Application.UnitTests/Builders/TaskItemBuilder.cs` (T20 owns `UserBuilder.cs` in the same folder)
 
 ## Out of scope
 - Controllers, EF Core, anything in Infrastructure or Api, `DependencyInjection.cs` (orchestrator)

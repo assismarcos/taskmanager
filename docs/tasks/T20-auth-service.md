@@ -13,10 +13,12 @@ Implement registration, login and current-user use cases with their validators, 
 - Design: DD-01 sections 2, 3, 5 and 6
 - ADRs: ADR-0005, ADR-0006, ADR-0007
 - Contracts: `IAuthService`, DTOs, `IUserRepository`, `IPasswordHasher`, `ITokenService`, `ICurrentUser` (on `main`)
+- Normalize the email exactly as `User.Create` does (`Trim().ToLowerInvariant()`) before `GetByEmailAsync`, so login and registration agree.
 
 ## Scope — files you may create or change
 - `backend/src/TaskManager.Application/Auth/**`
 - `backend/tests/TaskManager.Application.UnitTests/Auth/**`
+- `backend/tests/TaskManager.Application.UnitTests/Builders/UserBuilder.cs` (T21 owns `TaskItemBuilder.cs` in the same folder)
 
 ## Out of scope
 - Controllers, EF Core, JWT and hashing implementations (Infrastructure), `DependencyInjection.cs` (orchestrator)

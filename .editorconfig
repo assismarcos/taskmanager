@@ -16,6 +16,7 @@ trim_trailing_whitespace = false
 
 [*.cs]
 csharp_style_namespace_declarations = file_scoped
+dotnet_style_namespace_match_folder = true
 csharp_using_directive_placement = outside_namespace
 dotnet_sort_system_directives_first = true
 dotnet_separate_import_directive_groups = false
@@ -30,6 +31,7 @@ csharp_style_prefer_primary_constructors = true
 dotnet_diagnostic.IDE0011.severity = warning
 dotnet_diagnostic.IDE0044.severity = warning
 dotnet_diagnostic.IDE0065.severity = warning
+dotnet_diagnostic.IDE0130.severity = warning
 dotnet_diagnostic.IDE0161.severity = warning
 
 dotnet_naming_rule.interfaces_start_with_i.symbols = interfaces

@@ -13,6 +13,7 @@ Implement `ITokenService` and `IPasswordHasher`, the validated `JwtOptions`, and
 - Design: DD-01 sections 2, 3 and 5; DD-04 sections 2, 3 and 4 (seed data table)
 - ADRs: ADR-0005, ADR-0003
 - Contracts: `ITokenService`, `AccessToken`, `IPasswordHasher` (on `main`); `PostgresFixture` (from T11)
+- Seed test classes follow the T11 pattern: `[Collection("Postgres")]`, `[Trait("Category", "Integration")]`, `IAsyncLifetime` with `InitializeAsync() => fixture.ResetAsync()`, contexts from `fixture.CreateContext()`. Tokens use `JsonWebTokenHandler` (`Microsoft.IdentityModel.JsonWebTokens`, already referenced); hashing wraps `PasswordHasher<User>` (`Microsoft.Extensions.Identity.Core`).
 
 ## Scope — files you may create or change
 - `backend/src/TaskManager.Infrastructure/Authentication/**` (`JwtOptions`, `JwtTokenService`, `PasswordHasher` adapter over `PasswordHasher<User>`)

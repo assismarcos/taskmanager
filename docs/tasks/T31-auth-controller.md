@@ -34,6 +34,7 @@ Attributes: `[ApiExplorerSettings(GroupName = "auth-v1")]`, `[AllowAnonymous]` o
 ## Definition of done
 - [ ] All tests above written first and seen failing, then passing
 - [ ] No business logic in the controller: call the service, map the result
+- [ ] `Controllers_ShouldNotDependOnInfrastructure` seen failing once: temporarily use an Infrastructure type in `AuthController`, run the architecture tests, see it fail naming the controller, then revert (T03 could not, because no controller existed yet)
 - [ ] Zero build warnings; `dotnet format` clean; architecture tests green
 - [ ] Only files inside Scope changed
 - [ ] Conventional commits: `test(api)` → `feat(api)` → `refactor(api)`

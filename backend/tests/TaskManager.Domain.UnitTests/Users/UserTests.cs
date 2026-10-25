@@ -26,6 +26,20 @@ public sealed class UserTests
     }
 
     [Fact]
+    public void Create_WithNonUtcNow_StoresCreatedAtInUtc()
+    {
+        // Arrange
+        var now = new DateTimeOffset(2026, 6, 15, 22, 0, 0, TimeSpan.FromHours(-5));
+
+        // Act
+        var user = User.Create("Ada Lovelace", "ada@example.com", "hash", now);
+
+        // Assert
+        user.CreatedAt.Offset.ShouldBe(TimeSpan.Zero);
+        user.CreatedAt.ShouldBe(now);
+    }
+
+    [Fact]
     public void Create_WhenNameIsEmpty_ThrowsDomainException()
     {
         // AC-1
