@@ -37,7 +37,9 @@ import { focusFirstInvalid } from './focus-first-invalid';
           <mat-form-field appearance="outline">
             <mat-label>Name</mat-label>
             <input matInput formControlName="name" autocomplete="name" />
-            @if (form.controls.name.hasError('required') || form.controls.name.hasError('pattern')) {
+            @if (
+              form.controls.name.hasError('required') || form.controls.name.hasError('pattern')
+            ) {
               <mat-error>Name is required</mat-error>
             } @else if (form.controls.name.hasError('maxlength')) {
               <mat-error>Name must be at most 100 characters</mat-error>

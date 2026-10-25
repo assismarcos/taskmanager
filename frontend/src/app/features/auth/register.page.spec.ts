@@ -132,9 +132,7 @@ describe('RegisterPage', () => {
     // Assert
     const emailError = fieldOf('input[type="email"]').querySelector('mat-error');
     expect(emailError?.textContent).toContain('Email is already registered');
-    expect(element.querySelector('input[type="email"]')?.getAttribute('aria-invalid')).toBe(
-      'true',
-    );
+    expect(element.querySelector('input[type="email"]')?.getAttribute('aria-invalid')).toBe('true');
   });
 
   it('shows the field message for a 400 with errors', async () => {
