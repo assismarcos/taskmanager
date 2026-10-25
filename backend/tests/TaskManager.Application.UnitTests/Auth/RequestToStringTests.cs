@@ -29,4 +29,18 @@ public sealed class RequestToStringTests
         // Assert
         text.ShouldNotContain("Secr3tPassword");
     }
+
+    [Fact]
+    public void LoginResponse_ToString_DoesNotRevealTheToken()
+    {
+        // Arrange
+        var user = new UserResponse(Guid.NewGuid(), "Ana", "ana@example.com");
+        var response = new LoginResponse("Secr3tToken", DateTimeOffset.UnixEpoch, user);
+
+        // Act
+        var text = response.ToString();
+
+        // Assert
+        text.ShouldNotContain("Secr3tToken");
+    }
 }
