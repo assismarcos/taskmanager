@@ -109,7 +109,8 @@ Smoke test (T40): a fresh clone, `cp .env.example .env`, `docker compose up --bu
 
 - **Docker Desktop must be running** for integration tests and compose. On Windows, Testcontainers uses the Linux engine (WSL2).
 - **The global toolchain is fixed.** The developer's machine keeps its installed Node.js 22.22.0, global Angular CLI 17.3.8 and .NET SDK 10.0.401. Everything the project needs is installed locally: `frontend/node_modules`, `.config/dotnet-tools.json`, and a `global.json` that pins the SDK for this repository only. `.claude/settings.json` denies global installs (`npm -g`, `nvm`, `dotnet tool -g`) and the global `ng`.
-- **Test platform**: xUnit v3 can run on Microsoft.Testing.Platform, where `dotnet test` filter syntax differs from VSTest. T00 picks the platform, confirms the unit-only filter command, and updates `CLAUDE.md` if it differs from `--filter "Category!=Integration"`.
+- **Test platform: VSTest** (decided in T00). Test projects use `xunit.v3.mtp-off` with `xunit.runner.visualstudio` and `Microsoft.NET.Test.Sdk`, so `dotnet test --filter "Category!=Integration"` runs the unit suite and `coverlet.collector` collects coverage. Microsoft.Testing.Platform was not chosen: its filter syntax differs, and every documented command would change.
+- **Package sources**: a repository `nuget.config` clears inherited sources and uses only nuget.org, so a restore never depends on feeds configured on the developer's machine.
 - **PostgreSQL 18 images** expect the volume at `/var/lib/postgresql`, not `/var/lib/postgresql/data`.
 - The fixture is duplicated across two test projects. This is a deliberate small duplication instead of a shared test-utilities project; revisit if it grows.
 - Local ports 5432, 5080 and 4200 must be free.

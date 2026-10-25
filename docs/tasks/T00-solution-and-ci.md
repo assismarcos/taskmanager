@@ -18,10 +18,13 @@ Create the empty .NET solution with its ten projects, the build settings that ke
 - `backend/src/TaskManager.{Domain,Application,Infrastructure,Api}/*.csproj` (+ the template `Program.cs` for Api, emptied to a minimal host)
 - `backend/tests/TaskManager.{Domain.UnitTests,Application.UnitTests,Api.UnitTests,Infrastructure.IntegrationTests,Api.IntegrationTests,ArchitectureTests}/*.csproj`
 - `global.json` (pin the .NET 10 SDK, `rollForward: latestFeature`)
+- `nuget.config` (clears inherited package sources and uses only nuget.org, so restores never depend on machine-level feeds)
 - `.config/dotnet-tools.json` (local tools: `dotnet-ef`, `dotnet-reportgenerator-globaltool`)
 - `.editorconfig`, `.gitignore` (add the .NET and Node entries to the existing minimal file)
+- `.gitattributes` (`* text=auto eol=lf`, so scripts used in Linux containers never get CRLF)
 - `.github/workflows/ci.yml` (`backend` job only; T12 adds `frontend`)
 - `CLAUDE.md` (Commands section only, if the test filter syntax changes)
+- `docs/design/DD-04-runtime-and-quality.md` section 7 (record the test platform decision)
 
 ## Out of scope
 - Any entity, interface, DTO or test (T02 onward)
