@@ -37,5 +37,5 @@ Write the artifacts every later task depends on: the spec, the four design docs,
 - [ ] Each acceptance criterion AC-1 to AC-9 appears in at least one design doc section 6 and in at least one task's tests
 - [ ] Every `docs/...` path mentioned in these files exists or is created by a named task
 - [ ] `CLAUDE.md` under 200 lines; `.claude/settings.json` is valid JSON
-- [ ] In a new session, `/agents` lists 5 agents and `/` lists the 4 skills
+- [ ] In a new session, asking Claude which subagents are available lists the 5 agents, and `/` lists the 4 skills
 - [ ] Developer reviewed and approved; merged to `main` before Phase 1 (agent worktrees branch from `main`)
