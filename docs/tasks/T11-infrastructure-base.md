@@ -1,7 +1,7 @@
 # T11 — Infrastructure base: AppDbContext, mappings, migration, PostgresFixture
 
 - Phase: 1 — Core
-- Depends on: T02
+- Depends on: T10
 - Agent: backend
 - Design: `docs/design/DD-02-task-management.md`, `docs/design/DD-01-authentication.md`, `docs/design/DD-04-runtime-and-quality.md`
 
@@ -12,7 +12,9 @@ Map `User` and `TaskItem` to PostgreSQL, create the initial migration, and build
 - Spec: `docs/spec/user-story.md` — AC-1 (unique email), AC-3 (ownership via FK)
 - Design: DD-01 section 4; DD-02 section 4; DD-04 section 6 (fixture design)
 - ADRs: ADR-0003, ADR-0008
-- Contracts: entity shapes in `TaskManager.Domain` (from T02)
+- Contracts: entities in `TaskManager.Domain` (shapes from T02, behavior from T10)
+- Test data is created in code: `User.Create` / `TaskItem.Create`, saved through `AppDbContext`. No SQL.
+  EF Core reads rows back through each entity's private constructor (DD-01 and DD-02 section 4).
 
 ## Scope — files you may create or change
 - `backend/src/TaskManager.Infrastructure/Persistence/AppDbContext.cs`
