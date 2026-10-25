@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: |
+          dotnet tool restore
+          dotnet restore backend/TaskManager.slnx
+
+      - name: Build
+        run: dotnet build backend/TaskManager.slnx --no-restore --configuration Release
+
+      - name: Check formatting
+        run: dotnet format backend/TaskManager.slnx --verify-no-changes --no-restore
+
+      - name: Unit tests
+        run: >-
+          dotnet test backend/TaskManager.slnx --no-build --configuration Release
+          --filter "Category!=Integration"
+          --collect "XPlat Code Coverage" --results-directory TestResults
+
+      - name: Integration tests
+        run: >-
+          dotnet test backend/TaskManager.slnx --no-build --configuration Release
+          --filter "Category=Integration"
+          --collect "XPlat Code Coverage" --results-directory TestResults
+
+      - name: Coverage report
+        run: |
+          dotnet reportgenerator -reports:"TestResults/**/coverage.cobertura.xml" -targetdir:coverage -reporttypes:"Html;MarkdownSummaryGithub"
+          cat coverage/SummaryGithub.md >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: coverage
+          path: coverage
