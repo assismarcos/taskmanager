@@ -12,5 +12,13 @@ public sealed record TaskResponse(
     DateTimeOffset CreatedAt,
     DateTimeOffset UpdatedAt)
 {
-    public static TaskResponse FromEntity(TaskItem task, DateOnly today) => throw new NotImplementedException();
+    public static TaskResponse FromEntity(TaskItem task, DateOnly today) => new(
+        task.Id,
+        task.Title,
+        task.Description,
+        task.Status,
+        task.DueDate,
+        task.IsOverdue(today),
+        task.CreatedAt,
+        task.UpdatedAt);
 }
