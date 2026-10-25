@@ -26,7 +26,7 @@ Out of scope: refresh tokens, server-side logout (the client discards the token)
 3. An unknown email and a wrong password (`IPasswordHasher.Verify` returns false) produce the **same** `auth.invalid_credentials` error, so the response does not reveal which emails exist.
 4. `ITokenService.CreateToken(user)` returns the token and its expiry. The controller returns 200 with `LoginResponse`.
 
-**Me**: `ICurrentUser.UserId` (the `sub` claim) is used to load the user and return `UserResponse`. If the user no longer exists, the result is `Unauthorized`.
+**Me**: `ICurrentUser.UserId` (the `sub` claim) is used to load the user and return `UserResponse`. If the user no longer exists, the result is `Unauthorized` with the code `auth.invalid_token`.
 
 **Every other request**: JwtBearer validates issuer, audience, signature and lifetime (clock skew 30 s). A **fallback authorization policy** requires an authenticated user on every endpoint. Only `register`, `login`, `status`, `/health` and the OpenAPI/Scalar endpoints opt out with `[AllowAnonymous]`. A new endpoint is therefore protected unless someone explicitly opens it (AC-9).
 
@@ -81,6 +81,7 @@ Errors (`Error` and `ErrorType` are defined in DD-02 section 3 and ADR-0006):
 | `validation` (with field errors) | Validation | 400, `ValidationProblemDetails` |
 | `auth.email_taken` | Conflict | 409 |
 | `auth.invalid_credentials` | Unauthorized | 401, detail "Invalid email or password" |
+| `auth.invalid_token` | Unauthorized | 401, detail "The access token is no longer valid." (`/me` when the token's user no longer exists) |
 | missing or invalid token | — (JwtBearer) | 401 |
 | too many login attempts | — (rate limiter) | 429 |
 
