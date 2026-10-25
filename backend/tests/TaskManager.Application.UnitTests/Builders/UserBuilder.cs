@@ -4,22 +4,10 @@ namespace TaskManager.Application.UnitTests.Builders;
 
 public sealed class UserBuilder
 {
-    private string _name = "Ana Souza";
-    private string _email = "ana@example.com";
-    private string _passwordHash = "stored-hash";
+    private readonly string _name = "Ana Souza";
+    private readonly string _email = "ana@example.com";
     private readonly DateTimeOffset _now = new(2026, 1, 15, 10, 0, 0, TimeSpan.Zero);
-
-    public UserBuilder WithName(string name)
-    {
-        _name = name;
-        return this;
-    }
-
-    public UserBuilder WithEmail(string email)
-    {
-        _email = email;
-        return this;
-    }
+    private string _passwordHash = "stored-hash";
 
     public UserBuilder WithPasswordHash(string passwordHash)
     {
