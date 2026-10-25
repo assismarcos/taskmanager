@@ -1,7 +1,27 @@
-# Secrets and personal configuration (T00 adds the .NET and Node entries)
+# Secrets and personal configuration
 .env
 .claude/settings.local.json
 CLAUDE.local.md
 
 # Git worktrees created by Claude Code
 .claude/worktrees/
+
+# .NET
+bin/
+obj/
+TestResults/
+*.user
+.vs/
+
+# Node and Angular
+node_modules/
+.angular/
+dist/
+
+# Coverage reports
+coverage/
+
+# Editors and OS
+.idea/
+.DS_Store
+Thumbs.db
