@@ -55,6 +55,8 @@ export interface PagedResponse<T> { items: T[]; page: number; pageSize: number; 
 export interface User { id: string; name: string; email: string; }
 export interface LoginResponse { accessToken: string; expiresAt: string; user: User; }
 export interface ProblemDetails { title?: string; status?: number; detail?: string; errors?: Record<string, string[]>; }
+// Plus the request types from docs/api.md: RegisterRequest, LoginRequest, CreateTaskRequest,
+// UpdateTaskRequest and TaskListQuery, so T24 and T34 never need to edit core/models.
 ```
 
 | Service | Public surface |
