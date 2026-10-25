@@ -55,13 +55,15 @@ public sealed class TaskItem
     {
         var cleanTitle = NormalizeTitle(title);
         var cleanDescription = NormalizeDescription(description);
+        EnsureDefined(status);
 
-        if (dueDate < DateOnly.FromDateTime(now.UtcDateTime))
+        var utcNow = now.ToUniversalTime();
+        if (dueDate < DateOnly.FromDateTime(utcNow.UtcDateTime))
         {
             throw new DomainException("Due date cannot be in the past.");
         }
 
-        return new TaskItem(Guid.CreateVersion7(), userId, cleanTitle, cleanDescription, status, dueDate, now, now);
+        return new TaskItem(Guid.CreateVersion7(), userId, cleanTitle, cleanDescription, status, dueDate, utcNow, utcNow);
     }
 
     public void Update(string title, string? description, DateOnly dueDate, DateTimeOffset now)
@@ -69,7 +71,7 @@ public sealed class TaskItem
         Title = NormalizeTitle(title);
         Description = NormalizeDescription(description);
         DueDate = dueDate; // AC-5: the past-date rule applies on creation only
-        UpdatedAt = now;
+        UpdatedAt = now.ToUniversalTime();
     }
 
     public bool CanChangeStatusTo(TaskItemStatus newStatus) =>
@@ -77,6 +79,7 @@ public sealed class TaskItem
 
     public void ChangeStatus(TaskItemStatus newStatus, DateTimeOffset now)
     {
+        EnsureDefined(newStatus);
         if (!CanChangeStatusTo(newStatus))
         {
             throw new DomainException($"A {Status} task cannot move to {newStatus}.");
@@ -88,10 +91,18 @@ public sealed class TaskItem
         }
 
         Status = newStatus;
-        UpdatedAt = now;
+        UpdatedAt = now.ToUniversalTime();
     }
 
     public bool IsOverdue(DateOnly today) => Status != TaskItemStatus.Done && DueDate < today;
+
+    private static void EnsureDefined(TaskItemStatus status)
+    {
+        if (!Enum.IsDefined(status))
+        {
+            throw new DomainException($"Unknown status {(int)status}.");
+        }
+    }
 
     private static string NormalizeTitle(string title)
     {

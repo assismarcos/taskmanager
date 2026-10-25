@@ -29,6 +29,8 @@ public sealed class User
 
     public static User Create(string name, string email, string passwordHash, DateTimeOffset now)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(passwordHash);
+
         var cleanName = name?.Trim() ?? string.Empty;
         if (cleanName.Length is 0 or > NameMaxLength)
         {
