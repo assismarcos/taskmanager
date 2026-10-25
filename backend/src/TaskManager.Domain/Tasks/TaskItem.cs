@@ -64,14 +64,34 @@ public sealed class TaskItem
         return new TaskItem(Guid.CreateVersion7(), userId, cleanTitle, cleanDescription, status, dueDate, now, now);
     }
 
-    public void Update(string title, string? description, DateOnly dueDate, DateTimeOffset now) =>
-        throw new NotImplementedException();
+    public void Update(string title, string? description, DateOnly dueDate, DateTimeOffset now)
+    {
+        Title = NormalizeTitle(title);
+        Description = NormalizeDescription(description);
+        DueDate = dueDate; // AC-5: the past-date rule applies on creation only
+        UpdatedAt = now;
+    }
 
-    public bool CanChangeStatusTo(TaskItemStatus newStatus) => throw new NotImplementedException();
+    public bool CanChangeStatusTo(TaskItemStatus newStatus) =>
+        newStatus == Status || !(Status == TaskItemStatus.Done && newStatus == TaskItemStatus.InProgress);
 
-    public void ChangeStatus(TaskItemStatus newStatus, DateTimeOffset now) => throw new NotImplementedException();
+    public void ChangeStatus(TaskItemStatus newStatus, DateTimeOffset now)
+    {
+        if (!CanChangeStatusTo(newStatus))
+        {
+            throw new DomainException($"A {Status} task cannot move to {newStatus}.");
+        }
 
-    public bool IsOverdue(DateOnly today) => throw new NotImplementedException();
+        if (newStatus == Status)
+        {
+            return;
+        }
+
+        Status = newStatus;
+        UpdatedAt = now;
+    }
+
+    public bool IsOverdue(DateOnly today) => Status != TaskItemStatus.Done && DueDate < today;
 
     private static string NormalizeTitle(string title)
     {
