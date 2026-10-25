@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(dotnet build *)",
+      "Bash(dotnet test *)",
+      "Bash(dotnet format *)",
+      "Bash(dotnet ef *)",
+      "Bash(npm run *)",
+      "Bash(npm test *)",
+      "Bash(docker compose *)",
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "PowerShell(dotnet build *)",
+      "PowerShell(dotnet test *)",
+      "PowerShell(dotnet format *)",
+      "PowerShell(dotnet ef *)",
+      "PowerShell(npm run *)",
+      "PowerShell(npm test *)",
+      "PowerShell(docker compose *)",
+      "PowerShell(git status)",
+      "PowerShell(git diff *)",
+      "PowerShell(git log *)",
+      "PowerShell(git add *)",
+      "PowerShell(git commit *)"
+    ],
+    "ask": [
+      "Bash(git merge *)",
+      "PowerShell(git merge *)"
+    ],
+    "deny": [
+      "Bash(git push)",
+      "Bash(git push *)",
+      "PowerShell(git push)",
+      "PowerShell(git push *)",
+      "Bash(rm -rf *)",
+      "PowerShell(Remove-Item *-Recurse*)",
+      "Read(./**/.env)",
+      "Edit(./**/.env)",
+      "Bash(npm -g *)",
+      "Bash(npm * -g*)",
+      "Bash(npm --global *)",
+      "Bash(npm * --global*)",
+      "Bash(nvm *)",
+      "Bash(ng *)",
+      "Bash(dotnet tool * -g*)",
+      "Bash(dotnet tool * --global*)",
+      "PowerShell(npm -g *)",
+      "PowerShell(npm * -g*)",
+      "PowerShell(npm --global *)",
+      "PowerShell(npm * --global*)",
+      "PowerShell(nvm *)",
+      "PowerShell(ng *)",
+      "PowerShell(dotnet tool * -g*)",
+      "PowerShell(dotnet tool * --global*)"
+    ]
+  }
+}
