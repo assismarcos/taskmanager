@@ -43,6 +43,6 @@ public sealed class User
             throw new DomainException($"Email is required and must be at most {EmailMaxLength} characters.");
         }
 
-        return new User(Guid.CreateVersion7(now),cleanName, cleanEmail, passwordHash, now);
+        return new User(Guid.CreateVersion7(now), cleanName, cleanEmail, passwordHash, now);
     }
 }

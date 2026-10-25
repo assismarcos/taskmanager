@@ -63,7 +63,7 @@ public sealed class TaskItem
             throw new DomainException("Due date cannot be in the past.");
         }
 
-        return new TaskItem(Guid.CreateVersion7(utcNow),userId, cleanTitle, cleanDescription, status, dueDate, utcNow, utcNow);
+        return new TaskItem(Guid.CreateVersion7(utcNow), userId, cleanTitle, cleanDescription, status, dueDate, utcNow, utcNow);
     }
 
     public void Update(string title, string? description, DateOnly dueDate, DateTimeOffset now)
