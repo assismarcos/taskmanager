@@ -17,9 +17,6 @@ internal sealed class TaskItemConfiguration : IEntityTypeConfiguration<TaskItem>
         builder.Property(task => task.Title).HasMaxLength(100).IsRequired();
         builder.Property(task => task.Description).HasMaxLength(1000);
         builder.Property(task => task.Status).HasConversion<string>().HasMaxLength(20).IsRequired();
-        builder.Property(task => task.DueDate).IsRequired();
-        builder.Property(task => task.CreatedAt).IsRequired();
-        builder.Property(task => task.UpdatedAt).IsRequired();
 
         builder.HasOne<User>()
             .WithMany()

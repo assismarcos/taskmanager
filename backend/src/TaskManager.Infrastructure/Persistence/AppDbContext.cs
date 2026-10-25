@@ -10,6 +10,9 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
     public DbSet<TaskItem> Tasks => Set<TaskItem>();
 
+    public static DbContextOptionsBuilder ConfigureOptions(DbContextOptionsBuilder builder, string connectionString) =>
+        builder.UseNpgsql(connectionString).UseSnakeCaseNamingConvention();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder) =>
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 }

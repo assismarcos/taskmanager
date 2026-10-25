@@ -16,13 +16,14 @@ public sealed class PostgresFixture : IAsyncLifetime
 
     public async ValueTask InitializeAsync()
     {
-        await _container.StartAsync();
+        var ct = TestContext.Current.CancellationToken;
+        await _container.StartAsync(ct);
 
         await using var context = CreateContext();
-        await context.Database.MigrateAsync();
+        await context.Database.MigrateAsync(ct);
 
         await using var connection = new NpgsqlConnection(ConnectionString);
-        await connection.OpenAsync();
+        await connection.OpenAsync(ct);
         _respawner = await Respawner.CreateAsync(connection, new RespawnerOptions
         {
             DbAdapter = DbAdapter.Postgres,
@@ -34,17 +35,15 @@ public sealed class PostgresFixture : IAsyncLifetime
 
     public AppDbContext CreateContext()
     {
-        var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseNpgsql(ConnectionString)
-            .UseSnakeCaseNamingConvention()
-            .Options;
-        return new AppDbContext(options);
+        var builder = new DbContextOptionsBuilder<AppDbContext>();
+        AppDbContext.ConfigureOptions(builder, ConnectionString);
+        return new AppDbContext(builder.Options);
     }
 
     public async Task ResetAsync()
     {
         await using var connection = new NpgsqlConnection(ConnectionString);
-        await connection.OpenAsync();
+        await connection.OpenAsync(TestContext.Current.CancellationToken);
         await _respawner.ResetAsync(connection);
     }
 }
