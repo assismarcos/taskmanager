@@ -173,6 +173,123 @@ public sealed class TaskItemTests
 
         // Assert
         act.ShouldThrow<DomainException>();
+        task.Status.ShouldBe(TaskItemStatus.Done);
+        task.UpdatedAt.ShouldBe(_now);
+    }
+
+    [Theory]
+    [InlineData(TaskItemStatus.Todo, TaskItemStatus.Todo, true)]
+    [InlineData(TaskItemStatus.Todo, TaskItemStatus.InProgress, true)]
+    [InlineData(TaskItemStatus.Todo, TaskItemStatus.Done, true)]
+    [InlineData(TaskItemStatus.InProgress, TaskItemStatus.Todo, true)]
+    [InlineData(TaskItemStatus.InProgress, TaskItemStatus.InProgress, true)]
+    [InlineData(TaskItemStatus.InProgress, TaskItemStatus.Done, true)]
+    [InlineData(TaskItemStatus.Done, TaskItemStatus.Todo, true)]
+    [InlineData(TaskItemStatus.Done, TaskItemStatus.InProgress, false)]
+    [InlineData(TaskItemStatus.Done, TaskItemStatus.Done, true)]
+    public void CanChangeStatusTo_ReturnsExpectedResult(TaskItemStatus from, TaskItemStatus to, bool expected)
+    {
+        // AC-6
+        // Arrange
+        var task = new TaskItemBuilder().WithStatus(from).Build();
+
+        // Act
+        var result = task.CanChangeStatusTo(to);
+
+        // Assert
+        result.ShouldBe(expected);
+    }
+
+    [Fact]
+    public void CanChangeStatusTo_ToSameStatus_ReturnsTrue()
+    {
+        // AC-6
+        // Arrange
+        var task = new TaskItemBuilder().WithStatus(TaskItemStatus.Done).Build();
+
+        // Act
+        var result = task.CanChangeStatusTo(TaskItemStatus.Done);
+
+        // Assert
+        result.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void ChangeStatus_ToSameStatus_LeavesUpdatedAtUnchanged()
+    {
+        // AC-6
+        // Arrange
+        var task = new TaskItemBuilder().WithStatus(TaskItemStatus.InProgress).Build();
+
+        // Act
+        task.ChangeStatus(TaskItemStatus.InProgress, _now.AddHours(3));
+
+        // Assert
+        task.Status.ShouldBe(TaskItemStatus.InProgress);
+        task.UpdatedAt.ShouldBe(_now);
+    }
+
+    [Fact]
+    public void Update_WhenTitleIsShorterThan3Chars_ThrowsDomainException()
+    {
+        // AC-4
+        // Arrange
+        var task = new TaskItemBuilder().Build();
+
+        // Act
+        var act = () => task.Update(" ab ", null, _today, _now);
+
+        // Assert
+        act.ShouldThrow<DomainException>();
+    }
+
+    [Fact]
+    public void Update_WithWhitespaceDescription_StoresNull()
+    {
+        // AC-4
+        // Arrange
+        var task = new TaskItemBuilder().Build();
+
+        // Act
+        task.Update("New title", "   ", _today, _now);
+
+        // Assert
+        task.Description.ShouldBeNull();
+    }
+
+    [Theory]
+    [InlineData(3, 0)]
+    [InlineData(100, 0)]
+    [InlineData(5, 1000)]
+    public void Create_WithBoundaryLengths_Succeeds(int titleLength, int descriptionLength)
+    {
+        // AC-4
+        // Arrange
+        var builder = new TaskItemBuilder()
+            .WithTitle(new string('a', titleLength))
+            .WithDescription(new string('b', descriptionLength));
+
+        // Act
+        var task = builder.Build();
+
+        // Assert
+        task.Title.Length.ShouldBe(titleLength);
+        (task.Description?.Length ?? 0).ShouldBe(descriptionLength);
+    }
+
+    [Fact]
+    public void Create_WhenDueDateIsBeforeTheUtcDateOfNow_ThrowsDomainException()
+    {
+        // AC-5
+        // Arrange
+        var localNow = new DateTimeOffset(2026, 6, 15, 22, 0, 0, TimeSpan.FromHours(-5));
+        var builder = new TaskItemBuilder().WithNow(localNow).WithDueDate(new DateOnly(2026, 6, 15));
+
+        // Act
+        var act = () => builder.Build();
+
+        // Assert
+        act.ShouldThrow<DomainException>();
     }
 
     [Fact]
