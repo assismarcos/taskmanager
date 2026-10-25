@@ -35,8 +35,8 @@ public sealed class TaskRepositoryTests(PostgresFixture fixture) : IAsyncLifetim
         await context.SaveChangesAsync(Ct);
     }
 
-    private static TaskItem NewTask(Guid userId, string title, DateOnly due, TaskItemStatus status = TaskItemStatus.Todo) =>
-        TaskItem.Create(userId, title, null, due, status, _now);
+    private static TaskItem NewTask(Guid userId, string title, DateOnly due, TaskItemStatus status = TaskItemStatus.Todo, DateTimeOffset? createdAt = null) =>
+        TaskItem.Create(userId, title, null, due, status, createdAt ?? _now);
 
     [Fact]
     public async Task List_ReturnsOnlyTasksOfGivenUser() // AC-3
@@ -83,9 +83,9 @@ public sealed class TaskRepositoryTests(PostgresFixture fixture) : IAsyncLifetim
         // Arrange
         var ana = await SeedUserAsync("ana@example.com");
         await SeedTasksAsync(
-            NewTask(ana.Id, "Late", new DateOnly(2026, 3, 1), TaskItemStatus.Done),
+            NewTask(ana.Id, "Alpha later", new DateOnly(2026, 3, 1), TaskItemStatus.Done),
             NewTask(ana.Id, "Skipped", new DateOnly(2026, 2, 1), TaskItemStatus.Todo),
-            NewTask(ana.Id, "Early", new DateOnly(2026, 2, 5), TaskItemStatus.Done));
+            NewTask(ana.Id, "Zulu earlier", new DateOnly(2026, 2, 5), TaskItemStatus.Done, _now.AddMinutes(5)));
         await using var context = fixture.CreateContext();
         var repository = new TaskRepository(context);
 
@@ -93,9 +93,46 @@ public sealed class TaskRepositoryTests(PostgresFixture fixture) : IAsyncLifetim
         var result = await repository.ListAsync(ana.Id, TaskItemStatus.Done, 1, 10, Ct);
 
         // Assert
-        result.Items.Select(t => t.Title).ShouldBe(["Early", "Late"]);
+        result.Items.Select(t => t.Title).ShouldBe(["Zulu earlier", "Alpha later"]);
         result.TotalCount.ShouldBe(2);
         context.ChangeTracker.Entries().ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task List_WithSameDueDate_OrdersByCreatedAt() // AC-7
+    {
+        // Arrange
+        var ana = await SeedUserAsync("ana@example.com");
+        await SeedTasksAsync(
+            NewTask(ana.Id, "Newest", _due, createdAt: _now.AddMinutes(1)),
+            NewTask(ana.Id, "Oldest", _due, createdAt: _now));
+        await using var context = fixture.CreateContext();
+        var repository = new TaskRepository(context);
+
+        // Act
+        var result = await repository.ListAsync(ana.Id, null, 1, 10, Ct);
+
+        // Assert
+        result.Items.Select(t => t.Title).ShouldBe(["Oldest", "Newest"]);
+    }
+
+    [Fact]
+    public async Task List_WithSameDueDateAndCreatedAt_OrdersById() // AC-7
+    {
+        // Arrange
+        var ana = await SeedUserAsync("ana@example.com");
+        var tasks = new[] { NewTask(ana.Id, "First task", _due), NewTask(ana.Id, "Second task", _due) }
+            .OrderByDescending(t => t.Id)
+            .ToArray();
+        await SeedTasksAsync(tasks);
+        await using var context = fixture.CreateContext();
+        var repository = new TaskRepository(context);
+
+        // Act
+        var result = await repository.ListAsync(ana.Id, null, 1, 10, Ct);
+
+        // Assert
+        result.Items.Select(t => t.Id).ShouldBe(tasks.Select(t => t.Id).Order());
     }
 
     [Fact]
@@ -147,7 +184,7 @@ public sealed class TaskRepositoryTests(PostgresFixture fixture) : IAsyncLifetim
         await SeedTasksAsync(task);
         await using var context = fixture.CreateContext();
         var repository = new TaskRepository(context);
-        var tracked = (await repository.GetByIdAsync(ana.Id, task.Id, Ct))!;
+        var tracked = (await repository.GetByIdAsync(ana.Id, task.Id, Ct)).ShouldNotBeNull();
         tracked.Update("New title", null, _due, _now);
 
         // Act
@@ -164,17 +201,50 @@ public sealed class TaskRepositoryTests(PostgresFixture fixture) : IAsyncLifetim
         // Arrange
         var ana = await SeedUserAsync("ana@example.com");
         var task = NewTask(ana.Id, "Doomed", _due);
-        await SeedTasksAsync(task);
+        var survivor = NewTask(ana.Id, "Survivor", _due);
+        await SeedTasksAsync(task, survivor);
         await using var context = fixture.CreateContext();
         var repository = new TaskRepository(context);
-        var tracked = (await repository.GetByIdAsync(ana.Id, task.Id, Ct))!;
+        var tracked = (await repository.GetByIdAsync(ana.Id, task.Id, Ct)).ShouldNotBeNull();
 
         // Act
         await repository.DeleteAsync(tracked, Ct);
 
         // Assert
         await using var verify = fixture.CreateContext();
-        (await verify.Tasks.AnyAsync(Ct)).ShouldBeFalse();
+        (await verify.Tasks.Select(t => t.Id).ToListAsync(Ct)).ShouldBe([survivor.Id]);
+    }
+
+    [Fact]
+    public async Task Update_WhenTaskIsNotTracked_Throws()
+    {
+        // Arrange
+        var ana = await SeedUserAsync("ana@example.com");
+        var detached = NewTask(ana.Id, "Detached", _due);
+        await using var context = fixture.CreateContext();
+        var repository = new TaskRepository(context);
+
+        // Act
+        var act = () => repository.UpdateAsync(detached, Ct);
+
+        // Assert
+        (await Should.ThrowAsync<InvalidOperationException>(act)).Message.ShouldBe("Load the task with GetByIdAsync first.");
+    }
+
+    [Fact]
+    public async Task Delete_WhenTaskIsNotTracked_Throws()
+    {
+        // Arrange
+        var ana = await SeedUserAsync("ana@example.com");
+        var detached = NewTask(ana.Id, "Detached", _due);
+        await using var context = fixture.CreateContext();
+        var repository = new TaskRepository(context);
+
+        // Act
+        var act = () => repository.DeleteAsync(detached, Ct);
+
+        // Assert
+        (await Should.ThrowAsync<InvalidOperationException>(act)).Message.ShouldBe("Load the task with GetByIdAsync first.");
     }
 
     [Fact]

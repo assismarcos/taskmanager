@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using TaskManager.Domain.Users;
 using TaskManager.Infrastructure.IntegrationTests.Fixtures;
 using TaskManager.Infrastructure.Persistence.Repositories;
@@ -33,6 +34,25 @@ public sealed class UserRepositoryTests(PostgresFixture fixture) : IAsyncLifetim
         added.ShouldBeFalse();
         context.Entry(duplicate).State.ShouldBe(EntityState.Detached);
         (await context.Users.CountAsync(Ct)).ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task TryAdd_WhenIdAlreadyExists_ThrowsInsteadOfReportingTakenEmail()
+    {
+        // Arrange
+        await using var seed = fixture.CreateContext();
+        var ana = User.Create("Ana", "ana@example.com", "hash", _now);
+        seed.Users.Add(ana);
+        await seed.SaveChangesAsync(Ct);
+        await using var context = fixture.CreateContext();
+        var repository = new UserRepository(context);
+
+        // Act
+        var act = () => repository.TryAddAsync(ana, Ct);
+
+        // Assert
+        var exception = await Should.ThrowAsync<DbUpdateException>(act);
+        exception.InnerException.ShouldBeOfType<PostgresException>().ConstraintName.ShouldBe("pk_users");
     }
 
     [Fact]
