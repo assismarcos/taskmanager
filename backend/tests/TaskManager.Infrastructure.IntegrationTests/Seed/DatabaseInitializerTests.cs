@@ -16,6 +16,8 @@ public sealed class DatabaseInitializerTests(PostgresFixture fixture) : IAsyncLi
 
     private static readonly DateTimeOffset _now = new(2026, 1, 15, 10, 0, 0, TimeSpan.Zero);
 
+    private static readonly DateOnly Today = DateOnly.FromDateTime(_now.UtcDateTime);
+
     private readonly FakeTimeProvider _time = new(_now);
 
     public async ValueTask InitializeAsync() => await fixture.ResetAsync();
@@ -46,7 +48,14 @@ public sealed class DatabaseInitializerTests(PostgresFixture fixture) : IAsyncLi
         var other = users.Single(u => u.Email == OtherEmail);
         new PasswordHasher().Verify(demo.PasswordHash, "Demo@12345").ShouldBeTrue();
         new PasswordHasher().Verify(other.PasswordHash, "Other@12345").ShouldBeTrue();
-        (await context.Tasks.CountAsync(t => t.UserId == demo.Id, ct)).ShouldBe(8);
+        var demoTasks = await context.Tasks.Where(t => t.UserId == demo.Id).ToListAsync(ct);
+        demoTasks.Count.ShouldBe(8);
+        demoTasks.Count(t => t.Status == TaskItemStatus.Todo).ShouldBe(4);
+        demoTasks.Count(t => t.Status == TaskItemStatus.InProgress).ShouldBe(2);
+        demoTasks.Count(t => t.Status == TaskItemStatus.Done).ShouldBe(2);
+        demoTasks.Count(t => t.Status == TaskItemStatus.Done && t.DueDate < Today).ShouldBe(1);
+        demoTasks.Count(t => t.Status == TaskItemStatus.Todo && t.DueDate > Today.AddDays(90)).ShouldBe(1);
+        demoTasks.ShouldAllBe(t => t.CreatedAt >= demo.CreatedAt);
         (await context.Tasks.CountAsync(t => t.UserId == other.Id, ct)).ShouldBe(2);
     }
 
@@ -71,7 +80,6 @@ public sealed class DatabaseInitializerTests(PostgresFixture fixture) : IAsyncLi
     {
         // Arrange
         var ct = TestContext.Current.CancellationToken;
-        var today = DateOnly.FromDateTime(_now.UtcDateTime);
 
         // Act
         await RunSeedAsync();
@@ -80,9 +88,7 @@ public sealed class DatabaseInitializerTests(PostgresFixture fixture) : IAsyncLi
         await using var context = fixture.CreateContext();
         var demo = await context.Users.SingleAsync(u => u.Email == DemoEmail, ct);
         var tasks = await context.Tasks.Where(t => t.UserId == demo.Id).ToListAsync(ct);
-        tasks.Count(t => t.IsOverdue(today)).ShouldBeGreaterThanOrEqualTo(1);
-        tasks.Count(t => t.Status == TaskItemStatus.Todo).ShouldBe(4);
-        tasks.Count(t => t.Status == TaskItemStatus.InProgress).ShouldBe(2);
-        tasks.Count(t => t.Status == TaskItemStatus.Done).ShouldBe(2);
+        tasks.Where(t => t.IsOverdue(Today)).Select(t => t.Status)
+            .ShouldBe([TaskItemStatus.Todo, TaskItemStatus.InProgress], ignoreOrder: true);
     }
 }
