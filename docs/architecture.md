@@ -73,7 +73,7 @@ sequenceDiagram
 
 - JWT signed with HS256, valid for 60 minutes, no refresh token. The key comes from the environment.
 - A fallback authorization policy protects every endpoint; only register, login, status, health and the OpenAPI pages are anonymous.
-- Login is rate limited to 5 attempts per minute per IP. Unknown email and wrong password give the same error.
+- Login is rate limited to 5 attempts per minute per IP. Unknown email and wrong password give the same error. Behind the compose nginx the client address comes from `X-Forwarded-For`, trusted only from private networks (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16). Outside the local Docker setup, set the trusted proxy networks in `Program.cs` to the real proxy.
 - The SPA keeps the session in `sessionStorage` ([ADR-0010](adr/0010-browser-token-storage.md)). On any 401 it clears the session and goes to the login page.
 
 ## Data model

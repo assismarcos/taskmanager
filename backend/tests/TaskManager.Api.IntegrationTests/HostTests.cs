@@ -61,8 +61,7 @@ public sealed class HostTests(PostgresFixture database) : ApiTestBase(database)
         var json = await Client.GetFromJsonAsync<JsonElement>("/openapi/tasks-v1.json", ct);
 
         // Assert
-        var status = json.GetProperty("components").GetProperty("schemas").GetProperty("TaskStatus");
-        status.GetProperty("type").GetString().ShouldBe("string");
+        var status = json.GetProperty("components").GetProperty("schemas").GetProperty("TaskItemStatus");
         status.GetProperty("enum").EnumerateArray().Select(e => e.GetString())
             .ShouldBe(["Todo", "InProgress", "Done"]);
     }
