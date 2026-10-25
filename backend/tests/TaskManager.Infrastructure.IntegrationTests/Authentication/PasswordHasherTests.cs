@@ -1,3 +1,6 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
+using TaskManager.Domain.Users;
 using TaskManager.Infrastructure.Authentication;
 
 namespace TaskManager.Infrastructure.IntegrationTests.Authentication;
@@ -11,6 +14,23 @@ public sealed class PasswordHasherTests
     {
         // Arrange
         var hash = _hasher.Hash("Sample@12345");
+
+        // Act
+        var result = _hasher.Verify(hash, "Sample@12345");
+
+        // Assert
+        result.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Verify_WithHashThatNeedsRehash_ReturnsTrue() // AC-2
+    {
+        // Arrange
+        var legacy = new PasswordHasher<User>(Options.Create(new PasswordHasherOptions
+        {
+            CompatibilityMode = PasswordHasherCompatibilityMode.IdentityV2,
+        }));
+        var hash = legacy.HashPassword(null!, "Sample@12345");
 
         // Act
         var result = _hasher.Verify(hash, "Sample@12345");

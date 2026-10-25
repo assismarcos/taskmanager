@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
 
 namespace TaskManager.Infrastructure.Authentication;
 
@@ -19,4 +21,6 @@ public sealed class JwtOptions
 
     [Range(1, 1440)]
     public int ExpirationMinutes { get; init; } = 60;
+
+    public SymmetricSecurityKey CreateSigningKey() => new(Encoding.UTF8.GetBytes(Key));
 }
