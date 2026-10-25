@@ -1,14 +1,15 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace TaskManager.Application.Common;
 
 public class Result
 {
-    protected Result(Error? error)
-    {
-    }
+    protected Result(Error? error) => Error = error;
 
-    public bool IsSuccess => false;
+    [MemberNotNullWhen(false, nameof(Error))]
+    public bool IsSuccess => Error is null;
 
-    public Error? Error => null;
+    public Error? Error { get; }
 
     public static Result Success() => new(null);
 
