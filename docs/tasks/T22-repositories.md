@@ -13,6 +13,7 @@ Implement `TaskRepository` and `UserRepository` on EF Core, with the per-user fi
 - Design: DD-02 sections 3, 4, 5, 6 and 7; DD-01 sections 2 and 3 (`TryAddAsync` semantics)
 - ADRs: ADR-0003, ADR-0007 (`DbContext` is the unit of work), ADR-0008
 - Contracts: `ITaskRepository`, `IUserRepository` (on `main`); `PostgresFixture` (from T11)
+- Test classes follow the T11 pattern: `[Collection("Postgres")]`, `[Trait("Category", "Integration")]`, `IAsyncLifetime` with `InitializeAsync() => fixture.ResetAsync()`, contexts from `fixture.CreateContext()`, data from `User.Create` / `TaskItem.Create` (no SQL).
 
 ## Scope — files you may create or change
 - `backend/src/TaskManager.Infrastructure/Persistence/Repositories/**`
