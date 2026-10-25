@@ -17,6 +17,12 @@ public sealed class AuthService(
     private static readonly Error _invalidCredentials = new(
         ErrorType.Unauthorized, "auth.invalid_credentials", "Invalid email or password");
 
+    private static readonly Error _emailTaken = new(
+        ErrorType.Conflict, "auth.email_taken", "Email is already registered.");
+
+    private static readonly Error _invalidToken = new(
+        ErrorType.Unauthorized, "auth.invalid_token", "The access token is no longer valid.");
+
     public async Task<Result<UserResponse>> RegisterAsync(RegisterRequest request, CancellationToken ct)
     {
         var validation = await registerValidator.ValidateAsync(request, ct);
@@ -30,7 +36,7 @@ public sealed class AuthService(
 
         if (!await users.TryAddAsync(user, ct))
         {
-            return new Error(ErrorType.Conflict, "auth.email_taken", "Email is already registered.");
+            return _emailTaken;
         }
 
         return ToResponse(user);
@@ -61,8 +67,7 @@ public sealed class AuthService(
     {
         var user = await users.GetByIdAsync(currentUser.UserId, ct);
 
-        // A valid token for a deleted user must not grant access (AC-9).
-        return user is null ? _invalidCredentials : ToResponse(user);
+        return user is null ? _invalidToken : ToResponse(user);
     }
 
     private static UserResponse ToResponse(User user) => new(user.Id, user.Name, user.Email);

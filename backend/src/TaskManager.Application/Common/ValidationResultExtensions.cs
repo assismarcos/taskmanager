@@ -1,3 +1,4 @@
+using System.Text.Json;
 using FluentValidation.Results;
 
 namespace TaskManager.Application.Common;
@@ -15,6 +16,6 @@ public static class ValidationResultExtensions
         return new Error(ErrorType.Validation, "validation", "One or more validation errors occurred.", details);
     }
 
-    private static string ToCamelCase(string name) =>
-        name.Length == 0 ? name : char.ToLowerInvariant(name[0]) + name[1..];
+    private static string ToCamelCase(string propertyName) =>
+        string.Join('.', propertyName.Split('.').Select(JsonNamingPolicy.CamelCase.ConvertName));
 }
