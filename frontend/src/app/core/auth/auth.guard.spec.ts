@@ -1,3 +1,5 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import {
   ActivatedRouteSnapshot,
@@ -6,9 +8,8 @@ import {
   RouterStateSnapshot,
   UrlTree,
 } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { authGuard } from './auth.guard';
+import { AuthService } from './auth.service';
 import { TokenStorage } from './token-storage';
 
 function runGuard(url: string): unknown {
@@ -17,12 +18,24 @@ function runGuard(url: string): unknown {
   );
 }
 
+function configure(): void {
+  TestBed.configureTestingModule({
+    providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
+  });
+}
+
+function storeSessionExpiringIn(milliseconds: number): void {
+  TestBed.inject(TokenStorage).write({
+    accessToken: 't',
+    expiresAt: new Date(Date.now() + milliseconds).toISOString(),
+    user: { id: 'u1', name: 'Ann', email: 'ann@mail.com' },
+  });
+}
+
 describe('authGuard', () => {
   beforeEach(() => {
     sessionStorage.clear();
-    TestBed.configureTestingModule({
-      providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
-    });
+    configure();
   });
 
   it('redirects to /login with returnUrl when not authenticated', () => {
@@ -38,20 +51,35 @@ describe('authGuard', () => {
 
   it('allows navigation when authenticated', () => {
     // Arrange
-    TestBed.inject(TokenStorage).write({
-      accessToken: 't',
-      expiresAt: new Date(Date.now() + 60_000).toISOString(),
-      user: { id: 'u1', name: 'Ann', email: 'ann@mail.com' },
-    });
+    storeSessionExpiringIn(60_000);
     TestBed.resetTestingModule();
-    TestBed.configureTestingModule({
-      providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
-    });
+    configure();
 
     // Act
     const result = runGuard('/tasks');
 
     // Assert
     expect(result).toBe(true);
+  });
+
+  it('redirects and clears the session once it has expired', () => {
+    // Arrange
+    vi.useFakeTimers({ toFake: ['Date'] });
+    try {
+      storeSessionExpiringIn(60_000);
+      TestBed.resetTestingModule();
+      configure();
+      TestBed.inject(AuthService);
+      vi.setSystemTime(Date.now() + 2 * 60_000);
+
+      // Act
+      const result = runGuard('/tasks');
+
+      // Assert
+      expect(result).toBeInstanceOf(UrlTree);
+      expect(sessionStorage.getItem('tm.session')).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

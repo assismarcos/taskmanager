@@ -53,6 +53,25 @@ describe('AuthService', () => {
     expect(sessionStorage.getItem('tm.session')).toBeNull();
   });
 
+  it('accessToken logs out once the session has expired', () => {
+    // Arrange
+    vi.useFakeTimers({ toFake: ['Date'] });
+    try {
+      login();
+      vi.setSystemTime(Date.now() + 2 * 60 * 60_000);
+
+      // Act
+      const token = service.accessToken();
+
+      // Assert
+      expect(token).toBeNull();
+      expect(service.isAuthenticated()).toBe(false);
+      expect(sessionStorage.getItem('tm.session')).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('restores the session from sessionStorage', () => {
     // Arrange
     sessionStorage.setItem('tm.session', JSON.stringify(response));

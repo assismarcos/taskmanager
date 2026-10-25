@@ -1,10 +1,14 @@
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { AuthService } from '../core/auth/auth.service';
 import { TokenStorage } from '../core/auth/token-storage';
 import { ShellComponent } from './shell.component';
+
+@Component({ template: '' })
+class DummyPage {}
 
 describe('ShellComponent', () => {
   let element: HTMLElement;
@@ -14,7 +18,11 @@ describe('ShellComponent', () => {
     sessionStorage.clear();
     TestBed.configureTestingModule({
       imports: [ShellComponent],
-      providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
+      providers: [
+        provideRouter([{ path: 'login', component: DummyPage }]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
     });
     if (signedIn) {
       TestBed.inject(TokenStorage).write({
@@ -26,6 +34,12 @@ describe('ShellComponent', () => {
     fixture = TestBed.createComponent(ShellComponent);
     element = fixture.nativeElement as HTMLElement;
     await fixture.whenStable();
+  }
+
+  function logoutButton(): HTMLButtonElement | undefined {
+    return Array.from(element.querySelectorAll('button')).find(
+      (button) => button.textContent?.trim() === 'Log out',
+    );
   }
 
   it('renders the toolbar and router outlet', async () => {
@@ -42,8 +56,8 @@ describe('ShellComponent', () => {
     await render(false);
 
     // Assert
-    expect(element.querySelector('.user-name')).toBeNull();
-    expect(element.querySelector('button.logout')).toBeNull();
+    expect(element.textContent).not.toContain('Ann Lee');
+    expect(logoutButton()).toBeUndefined();
   });
 
   it('shows the user name and a logout button when authenticated', async () => {
@@ -51,22 +65,21 @@ describe('ShellComponent', () => {
     await render(true);
 
     // Assert
-    expect(element.querySelector('.user-name')?.textContent).toContain('Ann Lee');
-    expect(element.querySelector('button.logout')).not.toBeNull();
+    expect(element.querySelector('mat-toolbar')?.textContent).toContain('Ann Lee');
+    expect(logoutButton()).toBeDefined();
   });
 
   it('logout clears the session and goes to /login', async () => {
     // Arrange
     await render(true);
-    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
 
     // Act
-    element.querySelector<HTMLButtonElement>('button.logout')!.click();
+    logoutButton()!.click();
     await fixture.whenStable();
 
     // Assert
     expect(TestBed.inject(AuthService).isAuthenticated()).toBe(false);
-    expect(navigate).toHaveBeenCalledWith(['/login']);
-    expect(element.querySelector('button.logout')).toBeNull();
+    expect(TestBed.inject(Router).url).toBe('/login');
+    expect(logoutButton()).toBeUndefined();
   });
 });

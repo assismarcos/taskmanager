@@ -1,23 +1,30 @@
 import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { ApplicationRef, Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { provideRouter, Router } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
 import { errorInterceptor } from './error.interceptor';
 
+@Component({ template: '' })
+class DummyPage {}
+
 describe('errorInterceptor', () => {
   let http: HttpClient;
   let controller: HttpTestingController;
   let auth: AuthService;
-  let navigate: ReturnType<typeof vi.spyOn>;
+  let router: Router;
   let open: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     sessionStorage.clear();
     TestBed.configureTestingModule({
       providers: [
-        provideRouter([]),
+        provideRouter([
+          { path: 'login', component: DummyPage },
+          { path: 'tasks', component: DummyPage },
+        ]),
         provideHttpClient(withInterceptors([errorInterceptor])),
         provideHttpClientTesting(),
       ],
@@ -25,7 +32,7 @@ describe('errorInterceptor', () => {
     http = TestBed.inject(HttpClient);
     controller = TestBed.inject(HttpTestingController);
     auth = TestBed.inject(AuthService);
-    navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    router = TestBed.inject(Router);
     open = vi.spyOn(TestBed.inject(MatSnackBar), 'open');
   });
 
@@ -38,22 +45,25 @@ describe('errorInterceptor', () => {
     });
   }
 
-  it('logs out and redirects on 401', () => {
+  it('logs out and redirects on 401', async () => {
     // Arrange
     signIn();
+    await router.navigateByUrl('/tasks');
 
     // Act
     http.get('/api/tasks').subscribe({ error: () => undefined });
     controller.expectOne('/api/tasks').flush(null, { status: 401, statusText: 'Unauthorized' });
+    await TestBed.inject(ApplicationRef).whenStable();
 
     // Assert
     expect(auth.isAuthenticated()).toBe(false);
-    expect(navigate).toHaveBeenCalledWith(['/login']);
+    expect(router.url).toBe('/login?returnUrl=%2Ftasks');
   });
 
-  it('lets a 401 from login reach the page', () => {
+  it('lets a 401 from login reach the page', async () => {
     // Arrange
     let status = 0;
+    await router.navigateByUrl('/tasks');
 
     // Act
     http
@@ -65,7 +75,7 @@ describe('errorInterceptor', () => {
 
     // Assert
     expect(status).toBe(401);
-    expect(navigate).not.toHaveBeenCalled();
+    expect(router.url).toBe('/tasks');
   });
 
   it.each([0, 500, 503])('shows the snackbar on status %i', (status) => {
@@ -77,9 +87,10 @@ describe('errorInterceptor', () => {
     expect(open).toHaveBeenCalledWith('Something went wrong', 'Close', expect.anything());
   });
 
-  it('passes other errors to the page without a snackbar', () => {
+  it('passes other errors to the page without a snackbar', async () => {
     // Arrange
     let status = 0;
+    await router.navigateByUrl('/tasks');
 
     // Act
     http
@@ -90,6 +101,6 @@ describe('errorInterceptor', () => {
     // Assert
     expect(status).toBe(404);
     expect(open).not.toHaveBeenCalled();
-    expect(navigate).not.toHaveBeenCalled();
+    expect(router.url).toBe('/tasks');
   });
 });

@@ -43,6 +43,21 @@ describe('TokenStorage', () => {
     expect(sessionStorage.getItem(KEY)).toBeNull();
   });
 
+  it.each(['{}', '{"accessToken":"x"}', '123'])(
+    'treats a session without a valid expiry as empty (%s)',
+    (raw) => {
+      // Arrange
+      sessionStorage.setItem(KEY, raw);
+
+      // Act
+      const result = storage.read();
+
+      // Assert
+      expect(result).toBeNull();
+      expect(sessionStorage.getItem(KEY)).toBeNull();
+    },
+  );
+
   it('treats corrupt data as empty', () => {
     // Arrange
     sessionStorage.setItem(KEY, '{not json');
