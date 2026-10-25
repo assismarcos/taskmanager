@@ -23,7 +23,7 @@ describe('TasksStore', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [TasksStore, provideHttpClient(), provideHttpClientTesting()],
     });
     store = TestBed.inject(TasksStore);
     controller = TestBed.inject(HttpTestingController);
@@ -63,7 +63,7 @@ describe('TasksStore', () => {
     request.flush({ items: [], page: 1, pageSize: 10, totalCount: 0 });
   });
 
-  it('remove removes the task after the API confirms', () => {
+  it('remove reloads the current page after the API confirms', () => {
     // Arrange
     store.load();
     flushList([task('a'), task('b')], 2);
@@ -72,9 +72,44 @@ describe('TasksStore', () => {
     store.remove('a').subscribe();
     expect(store.tasks()).toHaveLength(2);
     controller.expectOne('/api/tasks/a').flush(null, { status: 204, statusText: 'No Content' });
+    flushList([task('b')], 1);
 
     // Assert
     expect(store.tasks().map((t) => t.id)).toEqual(['b']);
     expect(store.totalCount()).toBe(1);
+  });
+
+  it('remove steps back one page when the deleted task was the last on a later page', () => {
+    // Arrange
+    store.setPage(2, 10);
+    flushList([task('k')], 11, 2);
+
+    // Act
+    store.remove('k').subscribe();
+    controller.expectOne('/api/tasks/k').flush(null, { status: 204, statusText: 'No Content' });
+    flushList([], 10, 2);
+    const previous = controller.expectOne((r) => r.url === '/api/tasks');
+    previous.flush({ items: [task('a')], page: 1, pageSize: 10, totalCount: 10 });
+
+    // Assert
+    expect(previous.request.params.get('page')).toBe('1');
+    expect(store.page()).toBe(1);
+    expect(store.tasks().map((t) => t.id)).toEqual(['a']);
+  });
+
+  it('remove stays on page 1 when the last task is deleted', () => {
+    // Arrange
+    store.load();
+    flushList([task('a')], 1);
+
+    // Act
+    store.remove('a').subscribe();
+    controller.expectOne('/api/tasks/a').flush(null, { status: 204, statusText: 'No Content' });
+    flushList([], 0);
+
+    // Assert
+    controller.expectNone((r) => r.url === '/api/tasks');
+    expect(store.page()).toBe(1);
+    expect(store.tasks()).toEqual([]);
   });
 });
