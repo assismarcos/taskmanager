@@ -8,7 +8,7 @@
       "applicationUrl": "http://localhost:5080",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "ConnectionStrings__Default": "Host=localhost;Port=5432;Database=taskmanager;Username=taskmanager;Password=dev-only-password",
+        "ConnectionStrings__Default": "Host=localhost;Port=5432;Database=taskmanager;Username=taskmanager;Password=taskmanager-demo-password",
         "Jwt__Key": "DEV-ONLY-key-never-use-outside-local-development-0123456789"
       }
     }
