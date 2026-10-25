@@ -9,7 +9,7 @@ namespace TaskManager.Application.UnitTests.Tasks;
 
 public sealed class TaskServiceTests
 {
-    private static readonly DateOnly Today = new(2026, 6, 15);
+    private static readonly DateOnly _today = new(2026, 6, 15);
 
     private readonly ITaskRepository _tasks = Substitute.For<ITaskRepository>();
     private readonly ICurrentUser _currentUser = Substitute.For<ICurrentUser>();
@@ -36,7 +36,7 @@ public sealed class TaskServiceTests
         // Arrange
         TaskItem? saved = null;
         await _tasks.AddAsync(Arg.Do<TaskItem>(task => saved = task), Arg.Any<CancellationToken>());
-        var request = new CreateTaskRequest(" Write report ", " notes ", Today, TaskItemStatus.InProgress);
+        var request = new CreateTaskRequest(" Write report ", " notes ", _today, TaskItemStatus.InProgress);
 
         // Act
         var result = await _service.CreateAsync(request, CancellationToken.None);
@@ -73,7 +73,7 @@ public sealed class TaskServiceTests
         // Arrange
         var taskId = Guid.CreateVersion7();
         _tasks.GetByIdAsync(_userId, taskId, Arg.Any<CancellationToken>()).Returns((TaskItem?)null);
-        var request = new UpdateTaskRequest("New title", null, Today, TaskItemStatus.Todo);
+        var request = new UpdateTaskRequest("New title", null, _today, TaskItemStatus.Todo);
 
         // Act
         var result = await _service.UpdateAsync(taskId, request, CancellationToken.None);
@@ -107,7 +107,7 @@ public sealed class TaskServiceTests
     {
         // AC-4
         // Arrange
-        var request = new CreateTaskRequest(title, null, Today, null);
+        var request = new CreateTaskRequest(title, null, _today, null);
 
         // Act
         var result = await _service.CreateAsync(request, CancellationToken.None);
@@ -122,7 +122,7 @@ public sealed class TaskServiceTests
     {
         // AC-4
         // Arrange
-        var request = new CreateTaskRequest("Write report", new string('x', 1001), Today, null);
+        var request = new CreateTaskRequest("Write report", new string('x', 1001), _today, null);
 
         // Act
         var result = await _service.CreateAsync(request, CancellationToken.None);
@@ -136,7 +136,7 @@ public sealed class TaskServiceTests
     {
         // AC-5
         // Arrange
-        var request = new CreateTaskRequest("Write report", null, Today.AddDays(-1), null);
+        var request = new CreateTaskRequest("Write report", null, _today.AddDays(-1), null);
 
         // Act
         var result = await _service.CreateAsync(request, CancellationToken.None);
@@ -152,7 +152,7 @@ public sealed class TaskServiceTests
         // Arrange
         var task = new TaskItemBuilder().OwnedBy(_userId).Build();
         _tasks.GetByIdAsync(_userId, task.Id, Arg.Any<CancellationToken>()).Returns(task);
-        var request = new UpdateTaskRequest("New title", null, Today.AddDays(-3), TaskItemStatus.Todo);
+        var request = new UpdateTaskRequest("New title", null, _today.AddDays(-3), TaskItemStatus.Todo);
 
         // Act
         var result = await _service.UpdateAsync(task.Id, request, CancellationToken.None);
@@ -171,7 +171,7 @@ public sealed class TaskServiceTests
         // Arrange
         var task = new TaskItemBuilder().OwnedBy(_userId).WithStatus(TaskItemStatus.Done).Build();
         _tasks.GetByIdAsync(_userId, task.Id, Arg.Any<CancellationToken>()).Returns(task);
-        var request = new UpdateTaskRequest("New title", null, Today, TaskItemStatus.InProgress);
+        var request = new UpdateTaskRequest("New title", null, _today, TaskItemStatus.InProgress);
 
         // Act
         var result = await _service.UpdateAsync(task.Id, request, CancellationToken.None);
@@ -192,7 +192,7 @@ public sealed class TaskServiceTests
     {
         // AC-6
         // Arrange
-        var request = new CreateTaskRequest("Write report", null, Today, null);
+        var request = new CreateTaskRequest("Write report", null, _today, null);
 
         // Act
         var result = await _service.CreateAsync(request, CancellationToken.None);
@@ -259,10 +259,10 @@ public sealed class TaskServiceTests
     {
         // AC-8
         // Arrange
-        var overdue = new TaskItemBuilder().OwnedBy(_userId).WithDueDate(Today.AddDays(-1)).Build();
-        var dueToday = new TaskItemBuilder().OwnedBy(_userId).WithDueDate(Today).Build();
+        var overdue = new TaskItemBuilder().OwnedBy(_userId).WithDueDate(_today.AddDays(-1)).Build();
+        var dueToday = new TaskItemBuilder().OwnedBy(_userId).WithDueDate(_today).Build();
         var doneAndLate = new TaskItemBuilder()
-            .OwnedBy(_userId).WithDueDate(Today.AddDays(-1)).WithStatus(TaskItemStatus.Done).Build();
+            .OwnedBy(_userId).WithDueDate(_today.AddDays(-1)).WithStatus(TaskItemStatus.Done).Build();
         _tasks.ListAsync(_userId, null, 1, 10, Arg.Any<CancellationToken>())
             .Returns(new PagedResult<TaskItem>([overdue, dueToday, doneAndLate], 3));
 

@@ -7,8 +7,8 @@ public sealed class TaskItemBuilder
     public static readonly DateTimeOffset DefaultNow = new(2026, 6, 15, 10, 0, 0, TimeSpan.Zero);
 
     private Guid _userId = Guid.CreateVersion7();
-    private string _title = "Write report";
-    private string? _description = "Quarterly numbers";
+    private readonly string _title = "Write report";
+    private readonly string? _description = "Quarterly numbers";
     private DateOnly _dueDate = DateOnly.FromDateTime(DefaultNow.UtcDateTime).AddDays(7);
     private TaskItemStatus _status = TaskItemStatus.Todo;
 
