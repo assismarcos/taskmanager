@@ -14,7 +14,7 @@ public sealed class AuthService(
     IValidator<LoginRequest> loginValidator,
     TimeProvider timeProvider) : IAuthService
 {
-    private static readonly Error InvalidCredentials = new(
+    private static readonly Error _invalidCredentials = new(
         ErrorType.Unauthorized, "auth.invalid_credentials", "Invalid email or password");
 
     public async Task<Result<UserResponse>> RegisterAsync(RegisterRequest request, CancellationToken ct)
@@ -50,7 +50,7 @@ public sealed class AuthService(
         // Same error for an unknown email and a wrong password (AC-2).
         if (user is null || !passwordHasher.Verify(user.PasswordHash, request.Password))
         {
-            return InvalidCredentials;
+            return _invalidCredentials;
         }
 
         var token = tokenService.CreateToken(user);
@@ -62,7 +62,7 @@ public sealed class AuthService(
         var user = await users.GetByIdAsync(currentUser.UserId, ct);
 
         // A valid token for a deleted user must not grant access (AC-9).
-        return user is null ? InvalidCredentials : ToResponse(user);
+        return user is null ? _invalidCredentials : ToResponse(user);
     }
 
     private static UserResponse ToResponse(User user) => new(user.Id, user.Name, user.Email);

@@ -7,7 +7,7 @@ public sealed class UserBuilder
     private string _name = "Ana Souza";
     private string _email = "ana@example.com";
     private string _passwordHash = "stored-hash";
-    private DateTimeOffset _now = new(2026, 1, 15, 10, 0, 0, TimeSpan.Zero);
+    private readonly DateTimeOffset _now = new(2026, 1, 15, 10, 0, 0, TimeSpan.Zero);
 
     public UserBuilder WithName(string name)
     {
