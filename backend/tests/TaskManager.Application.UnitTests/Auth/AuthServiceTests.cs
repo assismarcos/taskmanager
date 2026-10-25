@@ -48,6 +48,23 @@ public sealed class AuthServiceTests
     }
 
     [Fact]
+    public async Task Register_SetsCreatedAtFromTimeProvider()
+    {
+        // Arrange
+        User? saved = null;
+        _hasher.Hash(Arg.Any<string>()).Returns("hashed");
+        _users.TryAddAsync(Arg.Do<User>(user => saved = user), Arg.Any<CancellationToken>()).Returns(true);
+
+        // Act
+        await _service.RegisterAsync(
+            new RegisterRequest("Ana", "ana@example.com", "Passw0rd123"), CancellationToken.None);
+
+        // Assert
+        // AC-1
+        saved.ShouldNotBeNull().CreatedAt.ShouldBe(_time.GetUtcNow());
+    }
+
+    [Fact]
     public async Task Register_WhenEmailIsTaken_ReturnsConflict()
     {
         // Arrange
@@ -85,9 +102,11 @@ public sealed class AuthServiceTests
     [Fact]
     public async Task Register_WithInvalidRequest_ReturnsValidationErrorAndSavesNothing()
     {
+        // Arrange
+        var request = new RegisterRequest("Ana", "bad", "short");
+
         // Act
-        var result = await _service.RegisterAsync(
-            new RegisterRequest("Ana", "bad", "short"), CancellationToken.None);
+        var result = await _service.RegisterAsync(request, CancellationToken.None);
 
         // Assert
         // AC-1
@@ -101,7 +120,7 @@ public sealed class AuthServiceTests
     public async Task Login_WithValidCredentials_ReturnsAccessToken()
     {
         // Arrange
-        var user = new UserBuilder().Build();
+        var user = new UserBuilder().WithPasswordHash("stored-hash").Build();
         var expiresAt = _time.GetUtcNow().AddMinutes(60);
         _users.GetByEmailAsync("ana@example.com", Arg.Any<CancellationToken>()).Returns(user);
         _hasher.Verify("stored-hash", "Passw0rd123").Returns(true);
@@ -171,8 +190,11 @@ public sealed class AuthServiceTests
     [Fact]
     public async Task Login_WithEmptyFields_ReturnsValidationError()
     {
+        // Arrange
+        var request = new LoginRequest("", "");
+
         // Act
-        var result = await _service.LoginAsync(new LoginRequest("", ""), CancellationToken.None);
+        var result = await _service.LoginAsync(request, CancellationToken.None);
 
         // Assert
         // AC-2
@@ -212,6 +234,7 @@ public sealed class AuthServiceTests
         // AC-9
         result.IsSuccess.ShouldBeFalse();
         result.Error.Type.ShouldBe(ErrorType.Unauthorized);
+        result.Error.Code.ShouldBe("auth.invalid_token");
     }
 
     private static void AssertInvalidCredentials(Result<LoginResponse> result)
