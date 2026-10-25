@@ -83,4 +83,99 @@ public class TaskItemTests
 
         task.DueDate.ShouldBe(Today);
     }
+
+    [Fact]
+    public void Update_WhenDueDateIsInThePast_Succeeds()
+    {
+        // AC-5
+        var task = new TaskItemBuilder().Build();
+        var pastDate = Today.AddDays(-5);
+        var later = Now.AddDays(1);
+
+        task.Update("New title", "New description", pastDate, later);
+
+        task.Title.ShouldBe("New title");
+        task.Description.ShouldBe("New description");
+        task.DueDate.ShouldBe(pastDate);
+        task.UpdatedAt.ShouldBe(later);
+    }
+
+    [Fact]
+    public void ChangeStatus_FromTodoToDone_Succeeds()
+    {
+        // AC-6
+        var task = new TaskItemBuilder().WithStatus(TaskItemStatus.Todo).Build();
+
+        task.ChangeStatus(TaskItemStatus.Done, Now);
+
+        task.Status.ShouldBe(TaskItemStatus.Done);
+    }
+
+    [Fact]
+    public void ChangeStatus_FromDoneToTodo_Succeeds()
+    {
+        // AC-6
+        var task = new TaskItemBuilder().WithStatus(TaskItemStatus.Done).Build();
+
+        task.ChangeStatus(TaskItemStatus.Todo, Now);
+
+        task.Status.ShouldBe(TaskItemStatus.Todo);
+    }
+
+    [Fact]
+    public void ChangeStatus_FromDoneToInProgress_ThrowsDomainException()
+    {
+        // AC-6
+        var task = new TaskItemBuilder().WithStatus(TaskItemStatus.Done).Build();
+
+        Should.Throw<DomainException>(() => task.ChangeStatus(TaskItemStatus.InProgress, Now));
+    }
+
+    [Fact]
+    public void CanChangeStatusTo_FromDoneToInProgress_ReturnsFalse()
+    {
+        // AC-6
+        var task = new TaskItemBuilder().WithStatus(TaskItemStatus.Done).Build();
+
+        task.CanChangeStatusTo(TaskItemStatus.InProgress).ShouldBeFalse();
+    }
+
+    [Fact]
+    public void ChangeStatus_UpdatesUpdatedAt()
+    {
+        var task = new TaskItemBuilder().Build();
+        var later = Now.AddHours(2);
+
+        task.ChangeStatus(TaskItemStatus.InProgress, later);
+
+        task.UpdatedAt.ShouldBe(later);
+        task.CreatedAt.ShouldBe(Now);
+    }
+
+    [Fact]
+    public void IsOverdue_WhenNotDoneAndDueDateHasPassed_ReturnsTrue()
+    {
+        // AC-8
+        var task = new TaskItemBuilder().WithDueDate(Today).Build();
+
+        task.IsOverdue(Today.AddDays(1)).ShouldBeTrue();
+    }
+
+    [Fact]
+    public void IsOverdue_WhenDone_ReturnsFalse()
+    {
+        // AC-8
+        var task = new TaskItemBuilder().WithDueDate(Today).WithStatus(TaskItemStatus.Done).Build();
+
+        task.IsOverdue(Today.AddDays(1)).ShouldBeFalse();
+    }
+
+    [Fact]
+    public void IsOverdue_WhenDueDateIsToday_ReturnsFalse()
+    {
+        // AC-8
+        var task = new TaskItemBuilder().WithDueDate(Today).Build();
+
+        task.IsOverdue(Today).ShouldBeFalse();
+    }
 }
