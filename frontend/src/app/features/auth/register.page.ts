@@ -1,13 +1,15 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 import { MatCard, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { ProblemDetails } from '../../core/models/problem-details.model';
+import { focusFirstInvalid } from './focus-first-invalid';
 
 @Component({
   selector: 'app-register-page',
@@ -35,7 +37,7 @@ import { ProblemDetails } from '../../core/models/problem-details.model';
           <mat-form-field appearance="outline">
             <mat-label>Name</mat-label>
             <input matInput formControlName="name" autocomplete="name" />
-            @if (form.controls.name.hasError('required')) {
+            @if (form.controls.name.hasError('required') || form.controls.name.hasError('pattern')) {
               <mat-error>Name is required</mat-error>
             } @else if (form.controls.name.hasError('maxlength')) {
               <mat-error>Name must be at most 100 characters</mat-error>
@@ -49,10 +51,10 @@ import { ProblemDetails } from '../../core/models/problem-details.model';
             <input matInput type="email" formControlName="email" autocomplete="email" />
             @if (form.controls.email.hasError('required')) {
               <mat-error>Email is required</mat-error>
-            } @else if (form.controls.email.hasError('email')) {
-              <mat-error>Enter a valid email</mat-error>
             } @else if (form.controls.email.hasError('maxlength')) {
               <mat-error>Email must be at most 254 characters</mat-error>
+            } @else if (form.controls.email.hasError('email')) {
+              <mat-error>Enter a valid email</mat-error>
             } @else if (form.controls.email.hasError('server')) {
               <mat-error>{{ form.controls.email.getError('server') }}</mat-error>
             }
@@ -87,28 +89,13 @@ import { ProblemDetails } from '../../core/models/problem-details.model';
       </mat-card-content>
     </mat-card>
   `,
-  styles: `
-    .auth-card {
-      max-width: 420px;
-      margin: 32px auto;
-    }
-
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      padding-top: 16px;
-    }
-
-    .form-error {
-      color: var(--mat-sys-error);
-      margin: 0;
-    }
-  `,
+  styleUrl: './auth-page.css',
 })
 export class RegisterPage {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly snackBar = inject(MatSnackBar);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   protected readonly submitting = signal(false);
   protected readonly formError = signal<string | null>(null);
@@ -116,18 +103,18 @@ export class RegisterPage {
   protected readonly form = new FormGroup({
     name: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.maxLength(100)],
+      validators: [Validators.required, Validators.pattern(/\S/), Validators.maxLength(100)],
     }),
     email: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.email, Validators.maxLength(254)],
+      validators: [Validators.required, Validators.maxLength(254), Validators.email],
     }),
     password: new FormControl('', {
       nonNullable: true,
       validators: [
         Validators.required,
         Validators.minLength(8),
-        Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d).*$/),
+        Validators.pattern(/^(?=.*\p{L})(?=.*\d).*$/u),
       ],
     }),
   });
@@ -136,11 +123,15 @@ export class RegisterPage {
     this.formError.set(null);
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      focusFirstInvalid(this.host.nativeElement, this.form.controls);
       return;
     }
     this.submitting.set(true);
     this.auth.register(this.form.getRawValue()).subscribe({
-      next: () => void this.router.navigateByUrl('/login'),
+      next: () => {
+        this.snackBar.open('Account created, please log in', 'Close', { duration: 5000 });
+        void this.router.navigateByUrl('/login');
+      },
       error: (error: HttpErrorResponse) => {
         this.submitting.set(false);
         this.showServerError(error);
@@ -149,10 +140,14 @@ export class RegisterPage {
   }
 
   private showServerError(error: HttpErrorResponse): void {
+    const problem = error.error as ProblemDetails | null;
+    const fieldErrors = problem?.errors ?? {};
     if (error.status === 409) {
       this.setServerError('email', 'Email is already registered');
-    } else if (error.status === 400) {
-      this.showValidationErrors((error.error as ProblemDetails | null)?.errors ?? {});
+    } else if (error.status === 400 && Object.keys(fieldErrors).length > 0) {
+      this.showValidationErrors(fieldErrors);
+    } else if (error.status >= 400 && error.status < 500) {
+      this.formError.set(problem?.detail ?? 'Registration failed, please try again');
     }
   }
 

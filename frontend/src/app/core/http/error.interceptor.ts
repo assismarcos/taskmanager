@@ -4,8 +4,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
-
-const LOGIN_URL = '/api/auth/login';
+import { LOGIN_URL } from '../auth/login-url';
 
 export const errorInterceptor: HttpInterceptorFn = (request, next) => {
   const auth = inject(AuthService);
@@ -16,7 +15,7 @@ export const errorInterceptor: HttpInterceptorFn = (request, next) => {
     catchError((error: HttpErrorResponse) => {
       if (error.status === 401 && request.url !== LOGIN_URL) {
         auth.logout();
-        void router.navigate(['/login']);
+        void router.navigate(['/login'], { queryParams: { returnUrl: router.url } });
       } else if (error.status === 0 || error.status >= 500) {
         snackBar.open('Something went wrong', 'Close', { duration: 5000 });
       }

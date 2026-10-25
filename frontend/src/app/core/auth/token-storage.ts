@@ -11,7 +11,7 @@ export class TokenStorage {
       return null;
     }
     const session = this.parse(raw);
-    if (session === null || Date.parse(session.expiresAt) <= Date.now()) {
+    if (!this.isActive(session)) {
       this.clear();
       return null;
     }
@@ -26,11 +26,25 @@ export class TokenStorage {
     sessionStorage.removeItem(KEY);
   }
 
-  private parse(raw: string): LoginResponse | null {
+  private parse(raw: string): unknown {
     try {
-      return JSON.parse(raw) as LoginResponse;
+      return JSON.parse(raw);
     } catch {
       return null;
     }
+  }
+
+  private isActive(value: unknown): value is LoginResponse {
+    if (typeof value !== 'object' || value === null) {
+      return false;
+    }
+    const { accessToken, expiresAt, user } = value as Partial<LoginResponse>;
+    return (
+      typeof accessToken === 'string' &&
+      typeof user === 'object' &&
+      user !== null &&
+      typeof expiresAt === 'string' &&
+      Date.parse(expiresAt) > Date.now()
+    );
   }
 }
