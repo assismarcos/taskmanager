@@ -100,7 +100,7 @@ Task body returned by every endpoint below (`TaskResponse`):
 | Parameter | Default | Rules |
 | --- | --- | --- |
 | `status` | all | `Todo`, `InProgress` or `Done` |
-| `page` | 1 | at least 1 |
+| `page` | 1 | 1 to 10000 |
 | `pageSize` | 10 | 1 to 50 |
 
 Ordered by `dueDate`, then `createdAt`. **200 OK**:
