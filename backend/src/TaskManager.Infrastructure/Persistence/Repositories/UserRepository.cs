@@ -21,7 +21,7 @@ public sealed class UserRepository(AppDbContext context) : IUserRepository
             await context.SaveChangesAsync(ct);
             return true;
         }
-        catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation })
+        catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: "ix_users_email" })
         {
             context.Entry(user).State = EntityState.Detached;
             return false;

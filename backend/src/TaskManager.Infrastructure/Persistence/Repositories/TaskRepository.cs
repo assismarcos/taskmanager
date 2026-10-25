@@ -41,11 +41,25 @@ public sealed class TaskRepository(AppDbContext context) : ITaskRepository
         await context.SaveChangesAsync(ct);
     }
 
-    public Task UpdateAsync(TaskItem task, CancellationToken ct) => context.SaveChangesAsync(ct);
+    public Task UpdateAsync(TaskItem task, CancellationToken ct)
+    {
+        EnsureTracked(task);
+        return context.SaveChangesAsync(ct);
+    }
 
     public async Task DeleteAsync(TaskItem task, CancellationToken ct)
     {
+        EnsureTracked(task);
         context.Tasks.Remove(task);
         await context.SaveChangesAsync(ct);
+    }
+
+    // DD-02 section 7: only entities loaded through GetByIdAsync passed the user filter.
+    private void EnsureTracked(TaskItem task)
+    {
+        if (context.Entry(task).State == EntityState.Detached)
+        {
+            throw new InvalidOperationException("Load the task with GetByIdAsync first.");
+        }
     }
 }
