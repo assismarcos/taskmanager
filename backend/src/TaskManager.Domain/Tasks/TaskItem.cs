@@ -63,7 +63,7 @@ public sealed class TaskItem
             throw new DomainException("Due date cannot be in the past.");
         }
 
-        return new TaskItem(Guid.CreateVersion7(), userId, cleanTitle, cleanDescription, status, dueDate, utcNow, utcNow);
+        return new TaskItem(Guid.CreateVersion7(utcNow),userId, cleanTitle, cleanDescription, status, dueDate, utcNow, utcNow);
     }
 
     public void Update(string title, string? description, DateOnly dueDate, DateTimeOffset now)
@@ -75,7 +75,7 @@ public sealed class TaskItem
     }
 
     public bool CanChangeStatusTo(TaskItemStatus newStatus) =>
-        newStatus == Status || !(Status == TaskItemStatus.Done && newStatus == TaskItemStatus.InProgress);
+        !(Status == TaskItemStatus.Done && newStatus == TaskItemStatus.InProgress);
 
     public void ChangeStatus(TaskItemStatus newStatus, DateTimeOffset now)
     {
