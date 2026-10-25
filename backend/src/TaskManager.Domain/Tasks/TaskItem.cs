@@ -1,7 +1,13 @@
+using TaskManager.Domain.Common;
+
 namespace TaskManager.Domain.Tasks;
 
 public sealed class TaskItem
 {
+    private const int TitleMinLength = 3;
+    private const int TitleMaxLength = 100;
+    private const int DescriptionMaxLength = 1000;
+
     // Also used by EF Core to materialize rows.
     private TaskItem(
         Guid id,
@@ -45,15 +51,83 @@ public sealed class TaskItem
         string? description,
         DateOnly dueDate,
         TaskItemStatus status,
-        DateTimeOffset now) =>
-        throw new NotImplementedException();
+        DateTimeOffset now)
+    {
+        var cleanTitle = NormalizeTitle(title);
+        var cleanDescription = NormalizeDescription(description);
+        EnsureDefined(status);
 
-    public void Update(string title, string? description, DateOnly dueDate, DateTimeOffset now) =>
-        throw new NotImplementedException();
+        var utcNow = now.ToUniversalTime();
+        if (dueDate < DateOnly.FromDateTime(utcNow.UtcDateTime))
+        {
+            throw new DomainException("Due date cannot be in the past.");
+        }
 
-    public bool CanChangeStatusTo(TaskItemStatus newStatus) => throw new NotImplementedException();
+        return new TaskItem(Guid.CreateVersion7(utcNow), userId, cleanTitle, cleanDescription, status, dueDate, utcNow, utcNow);
+    }
 
-    public void ChangeStatus(TaskItemStatus newStatus, DateTimeOffset now) => throw new NotImplementedException();
+    public void Update(string title, string? description, DateOnly dueDate, DateTimeOffset now)
+    {
+        Title = NormalizeTitle(title);
+        Description = NormalizeDescription(description);
+        DueDate = dueDate; // AC-5: the past-date rule applies on creation only
+        UpdatedAt = now.ToUniversalTime();
+    }
 
-    public bool IsOverdue(DateOnly today) => throw new NotImplementedException();
+    public bool CanChangeStatusTo(TaskItemStatus newStatus) =>
+        !(Status == TaskItemStatus.Done && newStatus == TaskItemStatus.InProgress);
+
+    public void ChangeStatus(TaskItemStatus newStatus, DateTimeOffset now)
+    {
+        EnsureDefined(newStatus);
+        if (!CanChangeStatusTo(newStatus))
+        {
+            throw new DomainException($"A {Status} task cannot move to {newStatus}.");
+        }
+
+        if (newStatus == Status)
+        {
+            return;
+        }
+
+        Status = newStatus;
+        UpdatedAt = now.ToUniversalTime();
+    }
+
+    public bool IsOverdue(DateOnly today) => Status != TaskItemStatus.Done && DueDate < today;
+
+    private static void EnsureDefined(TaskItemStatus status)
+    {
+        if (!Enum.IsDefined(status))
+        {
+            throw new DomainException($"Unknown status {(int)status}.");
+        }
+    }
+
+    private static string NormalizeTitle(string title)
+    {
+        var trimmed = title?.Trim() ?? string.Empty;
+        if (trimmed.Length is < TitleMinLength or > TitleMaxLength)
+        {
+            throw new DomainException($"Title must be between {TitleMinLength} and {TitleMaxLength} characters.");
+        }
+
+        return trimmed;
+    }
+
+    private static string? NormalizeDescription(string? description)
+    {
+        var trimmed = description?.Trim();
+        if (string.IsNullOrEmpty(trimmed))
+        {
+            return null;
+        }
+
+        if (trimmed.Length > DescriptionMaxLength)
+        {
+            throw new DomainException($"Description must be at most {DescriptionMaxLength} characters.");
+        }
+
+        return trimmed;
+    }
 }
