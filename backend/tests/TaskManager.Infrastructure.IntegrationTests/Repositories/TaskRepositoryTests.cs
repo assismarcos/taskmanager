@@ -124,7 +124,11 @@ public sealed class TaskRepositoryTests(PostgresFixture fixture) : IAsyncLifetim
         var tasks = new[] { NewTask(ana.Id, "First task", _due), NewTask(ana.Id, "Second task", _due) }
             .OrderByDescending(t => t.Id)
             .ToArray();
-        await SeedTasksAsync(tasks);
+        foreach (var task in tasks)
+        {
+            await SeedTasksAsync(task);
+        }
+
         await using var context = fixture.CreateContext();
         var repository = new TaskRepository(context);
 
