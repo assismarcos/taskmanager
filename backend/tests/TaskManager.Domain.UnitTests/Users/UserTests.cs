@@ -40,6 +40,33 @@ public sealed class UserTests
     }
 
     [Fact]
+    public void Create_WhenEmailIsLongerThan254Chars_ThrowsDomainException()
+    {
+        // AC-1
+        // Arrange
+        var email = new string('a', 250) + "@x.io";
+
+        // Act
+        var act = () => User.Create("Ada", email, "hash", _now);
+
+        // Assert
+        act.ShouldThrow<DomainException>();
+    }
+
+    [Fact]
+    public void Create_WhenPasswordHashIsBlank_ThrowsArgumentException()
+    {
+        // Arrange
+        const string passwordHash = "  ";
+
+        // Act
+        var act = () => User.Create("Ada", "ada@example.com", passwordHash, _now);
+
+        // Assert
+        act.ShouldThrow<ArgumentException>();
+    }
+
+    [Fact]
     public void Create_WhenNameIsLongerThan100Chars_ThrowsDomainException()
     {
         // AC-1

@@ -293,6 +293,79 @@ public sealed class TaskItemTests
     }
 
     [Fact]
+    public void Create_WithNonUtcNow_StoresTimestampsInUtc()
+    {
+        // Arrange
+        var localNow = new DateTimeOffset(2026, 6, 15, 22, 0, 0, TimeSpan.FromHours(-5));
+        var builder = new TaskItemBuilder().WithNow(localNow).WithDueDate(new DateOnly(2026, 6, 16));
+
+        // Act
+        var task = builder.Build();
+
+        // Assert
+        task.CreatedAt.Offset.ShouldBe(TimeSpan.Zero);
+        task.UpdatedAt.Offset.ShouldBe(TimeSpan.Zero);
+        task.CreatedAt.ShouldBe(localNow);
+    }
+
+    [Fact]
+    public void Update_WithNonUtcNow_StoresUpdatedAtInUtc()
+    {
+        // Arrange
+        var task = new TaskItemBuilder().Build();
+        var localNow = new DateTimeOffset(2026, 6, 16, 8, 0, 0, TimeSpan.FromHours(2));
+
+        // Act
+        task.Update("New title", null, _today, localNow);
+
+        // Assert
+        task.UpdatedAt.Offset.ShouldBe(TimeSpan.Zero);
+        task.UpdatedAt.ShouldBe(localNow);
+    }
+
+    [Fact]
+    public void ChangeStatus_WithNonUtcNow_StoresUpdatedAtInUtc()
+    {
+        // Arrange
+        var task = new TaskItemBuilder().Build();
+        var localNow = new DateTimeOffset(2026, 6, 16, 8, 0, 0, TimeSpan.FromHours(2));
+
+        // Act
+        task.ChangeStatus(TaskItemStatus.Done, localNow);
+
+        // Assert
+        task.UpdatedAt.Offset.ShouldBe(TimeSpan.Zero);
+        task.UpdatedAt.ShouldBe(localNow);
+    }
+
+    [Fact]
+    public void Create_WithUndefinedStatus_ThrowsDomainException()
+    {
+        // Arrange
+        var builder = new TaskItemBuilder().WithStatus((TaskItemStatus)42);
+
+        // Act
+        var act = () => builder.Build();
+
+        // Assert
+        act.ShouldThrow<DomainException>();
+    }
+
+    [Fact]
+    public void ChangeStatus_ToUndefinedStatus_ThrowsDomainException()
+    {
+        // Arrange
+        var task = new TaskItemBuilder().Build();
+
+        // Act
+        var act = () => task.ChangeStatus((TaskItemStatus)42, _now);
+
+        // Assert
+        act.ShouldThrow<DomainException>();
+        task.Status.ShouldBe(TaskItemStatus.Todo);
+    }
+
+    [Fact]
     public void CanChangeStatusTo_FromDoneToInProgress_ReturnsFalse()
     {
         // AC-6
