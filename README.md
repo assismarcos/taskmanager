@@ -39,6 +39,9 @@ To call the API from Scalar: send `POST /api/auth/login`, copy `accessToken`, an
 Prerequisites: .NET SDK 10, Node.js 22 and npm, and Docker for the database.
 
 ```bash
+# 0. Environment variables for compose (PowerShell: Copy-Item .env.example .env)
+cp .env.example .env
+
 # 1. PostgreSQL only
 docker compose up db
 

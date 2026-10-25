@@ -13,12 +13,12 @@ Only issues that were actually observed. "How detected" is almost always the `co
 | Persistence tests depended on test order, and a design-time factory contained a dummy password | Code review | Database reset per test class; the factory carries no credentials | T11 |
 | A password could be printed by the record `ToString()` | Code review | `PrintMembers` override on the request records; the same for `AccessToken` and `LoginResponse` | T20 |
 | camelCase property keys broke for `DueDate` in validation errors | Code review | Field names mapped explicitly to the JSON naming | T20 |
-| `PUT` without `dueDate` or `status` bound to default values | Code review | Required JSON constructor parameters in the API request model | T21 |
+| `PUT` without `dueDate` or `status` bound to default values | Code review | Required constructor parameters enforced by the serializer in the API JSON options (`JsonOptionsSetup`) | T30 |
 | The list-ordering test could not detect a wrong sort key | Code review | Test data built so only the intended key gives the expected order | T22 |
 | Update or delete of an untracked entity would skip the user filter | Code review | Guard that the entity belongs to the current user | T22 |
 | Token `exp` and `ExpiresAt` differed by under a second | Code review | One value is the source for both | T23 |
 | The seed test did not pin the DD-04 task mix | Code review | Test asserts the exact mix of statuses and overdue tasks | T23 |
-| `(page - 1) * pageSize` could overflow for a huge page number | Code review | Page capped at 10000 | T24 |
+| `(page - 1) * pageSize` could overflow for a huge page number | Code review | Page capped at 10000 | T21 |
 
 ## Frontend
 
