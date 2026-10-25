@@ -69,7 +69,7 @@ function notInThePast(control: AbstractControl<Date | null>): ValidationErrors |
     MatLabel,
     MatSuffix,
   ],
-  providers: [provideNativeDateAdapter()],
+  providers: [TasksStore, provideNativeDateAdapter()],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <h1>{{ isEdit ? 'Edit task' : 'New task' }}</h1>

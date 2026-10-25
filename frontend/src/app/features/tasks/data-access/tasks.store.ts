@@ -8,7 +8,7 @@ import {
 } from '../../../core/models/task.model';
 import { TasksApi } from './tasks.api';
 
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class TasksStore {
   private readonly api = inject(TasksApi);
 
@@ -29,12 +29,21 @@ export class TasksStore {
   readonly error = this._error.asReadonly();
 
   load(): void {
+    this.fetch(false);
+  }
+
+  private fetch(stepBackWhenEmpty: boolean): void {
     this._loading.set(true);
     this._error.set(false);
     this.api
       .list({ status: this._status(), page: this._page(), pageSize: this._pageSize() })
       .subscribe({
         next: (response) => {
+          if (stepBackWhenEmpty && response.items.length === 0 && this._page() > 1) {
+            this._page.update((page) => page - 1);
+            this.fetch(false);
+            return;
+          }
           this._tasks.set(response.items);
           this._totalCount.set(response.totalCount);
           this._loading.set(false);
@@ -71,11 +80,6 @@ export class TasksStore {
   }
 
   remove(id: string): Observable<void> {
-    return this.api.delete(id).pipe(
-      tap(() => {
-        this._tasks.update((tasks) => tasks.filter((task) => task.id !== id));
-        this._totalCount.update((count) => Math.max(0, count - 1));
-      }),
-    );
+    return this.api.delete(id).pipe(tap(() => this.fetch(true)));
   }
 }

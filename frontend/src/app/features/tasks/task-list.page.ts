@@ -53,6 +53,7 @@ import { toLocalDate } from './due-date';
     TaskCard,
     TaskFilters,
   ],
+  providers: [TasksStore],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <header class="bar">
