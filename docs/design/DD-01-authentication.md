@@ -98,6 +98,8 @@ Errors (`Error` and `ErrorType` are defined in DD-02 section 3 and ADR-0006):
 
 Because the email is always stored in lowercase, a plain unique index is enough (no `citext`).
 
+`User` has private setters and a private constructor that sets every property. `User.Create` uses it, and EF Core uses it to materialize rows.
+
 ## 5. Business rules and validation
 
 | Rule | Where | AC |

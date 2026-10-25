@@ -70,7 +70,8 @@ public interface ITaskRepository
 public enum ErrorType { Validation, NotFound, Conflict, Unauthorized }
 public sealed record Error(ErrorType Type, string Code, string Message,
     IReadOnlyDictionary<string, string[]>? Details = null);
-// Result and Result<T>: IsSuccess, Value, Error; implicit conversions from T and Error (ADR-0006)
+// Result and Result<T>: IsSuccess, Error (null on success), Value (throws on failure),
+// Success/Failure factories, implicit conversions from T and Error (ADR-0006)
 public sealed record PagedResult<T>(IReadOnlyList<T> Items, int TotalCount);
 public sealed record PagedResponse<T>(IReadOnlyList<T> Items, int Page, int PageSize, int TotalCount);
 ```
@@ -109,6 +110,8 @@ public sealed class TaskItem
     public bool IsOverdue(DateOnly today);
 }
 ```
+
+A private constructor sets every property. `Create` uses it, and EF Core uses it to materialize rows, so the entity needs no public or parameterless constructor.
 
 `tasks` table, from implementation plan section 6: `id` uuid PK (Guid v7), `user_id` uuid FK → `users.id` `ON DELETE CASCADE`, `title` varchar(100), `description` varchar(1000) null, `status` varchar(20) (enum stored as text), `due_date` date, `created_at` timestamptz, `updated_at` timestamptz.
 
