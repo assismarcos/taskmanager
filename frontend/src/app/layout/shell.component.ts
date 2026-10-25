@@ -1,14 +1,21 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { MatButton } from '@angular/material/button';
 import { MatToolbar } from '@angular/material/toolbar';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
+import { AuthService } from '../core/auth/auth.service';
 
 @Component({
   selector: 'app-shell',
-  imports: [MatToolbar, RouterLink, RouterOutlet],
+  imports: [MatButton, MatToolbar, RouterLink, RouterOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <mat-toolbar>
       <a class="brand" routerLink="/tasks">Task Manager</a>
+      <span class="spacer"></span>
+      @if (auth.currentUser(); as user) {
+        <span class="user-name">{{ user.name }}</span>
+        <button mat-button type="button" class="logout" (click)="logout()">Log out</button>
+      }
     </mat-toolbar>
     <main class="content">
       <router-outlet />
@@ -20,6 +27,14 @@ import { RouterLink, RouterOutlet } from '@angular/router';
       text-decoration: none;
     }
 
+    .spacer {
+      flex: 1;
+    }
+
+    .user-name {
+      margin-right: 8px;
+    }
+
     .content {
       max-width: 960px;
       margin: 0 auto;
@@ -27,4 +42,12 @@ import { RouterLink, RouterOutlet } from '@angular/router';
     }
   `,
 })
-export class ShellComponent {}
+export class ShellComponent {
+  protected readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
+
+  protected logout(): void {
+    this.auth.logout();
+    void this.router.navigate(['/login']);
+  }
+}
