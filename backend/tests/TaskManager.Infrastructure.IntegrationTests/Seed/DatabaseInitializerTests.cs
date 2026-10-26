@@ -49,14 +49,15 @@ public sealed class DatabaseInitializerTests(PostgresFixture fixture) : IAsyncLi
         new PasswordHasher().Verify(demo.PasswordHash, "Demo@12345").ShouldBeTrue();
         new PasswordHasher().Verify(other.PasswordHash, "Other@12345").ShouldBeTrue();
         var demoTasks = await context.Tasks.Where(t => t.UserId == demo.Id).ToListAsync(ct);
-        demoTasks.Count.ShouldBe(8);
-        demoTasks.Count(t => t.Status == TaskItemStatus.Todo).ShouldBe(4);
-        demoTasks.Count(t => t.Status == TaskItemStatus.InProgress).ShouldBe(2);
-        demoTasks.Count(t => t.Status == TaskItemStatus.Done).ShouldBe(2);
+        // More than one page of 10 for each user, so the demo shows pagination (AC-7).
+        demoTasks.Count.ShouldBe(15);
+        demoTasks.Count(t => t.Status == TaskItemStatus.Todo).ShouldBe(7);
+        demoTasks.Count(t => t.Status == TaskItemStatus.InProgress).ShouldBe(4);
+        demoTasks.Count(t => t.Status == TaskItemStatus.Done).ShouldBe(4);
         demoTasks.Count(t => t.Status == TaskItemStatus.Done && t.DueDate < _today).ShouldBe(1);
         demoTasks.Count(t => t.Status == TaskItemStatus.Todo && t.DueDate > _today.AddDays(90)).ShouldBe(1);
         demoTasks.ShouldAllBe(t => t.CreatedAt >= demo.CreatedAt);
-        (await context.Tasks.CountAsync(t => t.UserId == other.Id, ct)).ShouldBe(2);
+        (await context.Tasks.CountAsync(t => t.UserId == other.Id, ct)).ShouldBe(20);
     }
 
     [Fact]
@@ -72,7 +73,7 @@ public sealed class DatabaseInitializerTests(PostgresFixture fixture) : IAsyncLi
         // Assert
         await using var context = fixture.CreateContext();
         (await context.Users.CountAsync(ct)).ShouldBe(2);
-        (await context.Tasks.CountAsync(ct)).ShouldBe(10);
+        (await context.Tasks.CountAsync(ct)).ShouldBe(35);
     }
 
     [Fact]
