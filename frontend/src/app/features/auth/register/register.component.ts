@@ -7,9 +7,9 @@ import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../core/auth/auth.service';
-import { ProblemDetails } from '../../core/models/problem-details.model';
-import { focusFirstInvalid } from './focus-first-invalid';
+import { AuthService } from '../../../core/auth/auth.service';
+import { ProblemDetails } from '../../../core/models/problem-details.model';
+import { focusFirstInvalid } from '../focus-first-invalid';
 
 @Component({
   selector: 'app-register-page',
@@ -27,73 +27,10 @@ import { focusFirstInvalid } from './focus-first-invalid';
     MatLabel,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <mat-card class="auth-card">
-      <mat-card-header>
-        <mat-card-title>Create account</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-          <mat-form-field appearance="outline">
-            <mat-label>Name</mat-label>
-            <input matInput formControlName="name" autocomplete="name" />
-            @if (
-              form.controls.name.hasError('required') || form.controls.name.hasError('pattern')
-            ) {
-              <mat-error>Name is required</mat-error>
-            } @else if (form.controls.name.hasError('maxlength')) {
-              <mat-error>Name must be at most 100 characters</mat-error>
-            } @else if (form.controls.name.hasError('server')) {
-              <mat-error>{{ form.controls.name.getError('server') }}</mat-error>
-            }
-          </mat-form-field>
-
-          <mat-form-field appearance="outline">
-            <mat-label>Email</mat-label>
-            <input matInput type="email" formControlName="email" autocomplete="email" />
-            @if (form.controls.email.hasError('required')) {
-              <mat-error>Email is required</mat-error>
-            } @else if (form.controls.email.hasError('maxlength')) {
-              <mat-error>Email must be at most 254 characters</mat-error>
-            } @else if (form.controls.email.hasError('email')) {
-              <mat-error>Enter a valid email</mat-error>
-            } @else if (form.controls.email.hasError('server')) {
-              <mat-error>{{ form.controls.email.getError('server') }}</mat-error>
-            }
-          </mat-form-field>
-
-          <mat-form-field appearance="outline">
-            <mat-label>Password</mat-label>
-            <input
-              matInput
-              type="password"
-              formControlName="password"
-              autocomplete="new-password"
-            />
-            @if (form.controls.password.hasError('required')) {
-              <mat-error>Password is required</mat-error>
-            } @else if (form.controls.password.hasError('minlength')) {
-              <mat-error>Password must be at least 8 characters</mat-error>
-            } @else if (form.controls.password.hasError('pattern')) {
-              <mat-error>Password needs at least one letter and one digit</mat-error>
-            } @else if (form.controls.password.hasError('server')) {
-              <mat-error>{{ form.controls.password.getError('server') }}</mat-error>
-            }
-          </mat-form-field>
-
-          @if (formError()) {
-            <p class="form-error" role="alert">{{ formError() }}</p>
-          }
-
-          <button mat-flat-button type="submit" [disabled]="submitting()">Register</button>
-        </form>
-        <p>Already registered? <a routerLink="/login">Log in</a></p>
-      </mat-card-content>
-    </mat-card>
-  `,
-  styleUrl: './auth-page.css',
+  templateUrl: './register.component.html',
+  styleUrl: './register.component.scss',
 })
-export class RegisterPage {
+export class RegisterComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly snackBar = inject(MatSnackBar);

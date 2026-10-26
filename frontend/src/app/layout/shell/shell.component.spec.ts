@@ -3,8 +3,8 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
-import { AuthService } from '../core/auth/auth.service';
-import { TokenStorage } from '../core/auth/token-storage';
+import { AuthService } from '../../core/auth/auth.service';
+import { TokenStorage } from '../../core/auth/token-storage';
 import { ShellComponent } from './shell.component';
 
 @Component({ template: '' })

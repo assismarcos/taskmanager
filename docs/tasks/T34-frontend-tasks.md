@@ -26,11 +26,11 @@ Deliver the task screens: list with status filter, pagination and overdue highli
 - `TasksStore.load sets tasks and totalCount` (AC-7)
 - `TasksStore.setStatusFilter reloads from page 1` (AC-7)
 - `TasksStore.remove removes the task after the API confirms`
-- `TaskFormPage shows a validation message when the title is too short` (AC-4)
-- `TaskFormPage blocks a past due date on create` (AC-5)
-- `TaskFormPage offers only Done and Todo when editing a Done task` (AC-6)
-- `TaskFormPage maps 400 field errors to form controls` (AC-4, AC-5)
-- `TaskCard shows the overdue badge when isOverdue is true` (AC-8)
+- `TaskFormComponent shows a validation message when the title is too short` (AC-4)
+- `TaskFormComponent blocks a past due date on create` (AC-5)
+- `TaskFormComponent offers only Done and Todo when editing a Done task` (AC-6)
+- `TaskFormComponent maps 400 field errors to form controls` (AC-4, AC-5)
+- `TaskCardComponent shows the overdue badge when isOverdue is true` (AC-8)
 
 ## Definition of done
 - [ ] All tests above written first and seen failing, then passing (`npm test`)

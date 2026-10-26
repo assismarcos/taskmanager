@@ -27,11 +27,11 @@ import { MatError, MatFormField, MatHint, MatLabel, MatSuffix } from '@angular/m
 import { MatInput } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { ProblemDetails } from '../../core/models/problem-details.model';
-import { TaskStatus } from '../../core/models/task.model';
-import { focusFirstInvalid } from '../auth/focus-first-invalid';
-import { TasksStore } from './data-access/tasks.store';
-import { toDueDateString, toLocalDate, todayUtc } from './due-date';
+import { ProblemDetails } from '../../../core/models/problem-details.model';
+import { TaskStatus } from '../../../core/models/task.model';
+import { focusFirstInvalid } from '../../auth/focus-first-invalid';
+import { TasksStore } from '../data-access/tasks.store';
+import { toDueDateString, toLocalDate, todayUtc } from '../due-date';
 
 const ALL_STATUSES: TaskStatus[] = ['Todo', 'InProgress', 'Done'];
 const STATUS_LABELS: Record<TaskStatus, string> = {
@@ -71,94 +71,10 @@ function notInThePast(control: AbstractControl<Date | null>): ValidationErrors |
   ],
   providers: [TasksStore, provideNativeDateAdapter()],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <h1>{{ isEdit ? 'Edit task' : 'New task' }}</h1>
-    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-      <mat-form-field appearance="outline">
-        <mat-label>Title</mat-label>
-        <input matInput formControlName="title" />
-        @if (form.controls.title.hasError('server')) {
-          <mat-error>{{ form.controls.title.getError('server') }}</mat-error>
-        } @else if (form.controls.title.hasError('required')) {
-          <mat-error>Title is required</mat-error>
-        } @else if (form.controls.title.hasError('titleLength')) {
-          <mat-error>Title must be between 3 and 100 characters</mat-error>
-        }
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Description</mat-label>
-        <textarea matInput formControlName="description" rows="4"></textarea>
-        <mat-hint align="end">{{ form.controls.description.value.length }} / 1000</mat-hint>
-        @if (form.controls.description.hasError('server')) {
-          <mat-error>{{ form.controls.description.getError('server') }}</mat-error>
-        } @else if (form.controls.description.hasError('maxlength')) {
-          <mat-error>Description must be at most 1000 characters</mat-error>
-        }
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Due date</mat-label>
-        <input
-          matInput
-          formControlName="dueDate"
-          [matDatepicker]="picker"
-          [min]="isEdit ? null : minDate"
-        />
-        <mat-datepicker-toggle matIconSuffix [for]="picker" />
-        <mat-datepicker #picker />
-        @if (form.controls.dueDate.hasError('server')) {
-          <mat-error>{{ form.controls.dueDate.getError('server') }}</mat-error>
-        } @else if (form.controls.dueDate.hasError('required')) {
-          <mat-error>Due date is required</mat-error>
-        } @else if (
-          form.controls.dueDate.hasError('pastDate') ||
-          form.controls.dueDate.hasError('matDatepickerMin')
-        ) {
-          <mat-error>Due date cannot be in the past</mat-error>
-        } @else if (form.controls.dueDate.hasError('matDatepickerParse')) {
-          <mat-error>Enter a valid date</mat-error>
-        }
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Status</mat-label>
-        <select matNativeControl formControlName="status">
-          @for (status of statusOptions(); track status) {
-            <option [value]="status">{{ label(status) }}</option>
-          }
-        </select>
-        @if (form.controls.status.hasError('server')) {
-          <mat-error>{{ form.controls.status.getError('server') }}</mat-error>
-        }
-      </mat-form-field>
-
-      @if (formError()) {
-        <p class="form-error" role="alert">{{ formError() }}</p>
-      }
-
-      <div class="actions">
-        <button mat-flat-button type="submit" [disabled]="submitting()">Save</button>
-        <a mat-button routerLink="/tasks">Cancel</a>
-      </div>
-    </form>
-  `,
-  styles: `
-    form {
-      display: flex;
-      flex-direction: column;
-      max-width: 560px;
-    }
-    .form-error {
-      color: #b71c1c;
-    }
-    .actions {
-      display: flex;
-      gap: 8px;
-    }
-  `,
+  templateUrl: './task-form.component.html',
+  styleUrl: './task-form.component.scss',
 })
-export class TaskFormPage implements OnInit {
+export class TaskFormComponent implements OnInit {
   private readonly store = inject(TasksStore);
   private readonly router = inject(Router);
   private readonly snackBar = inject(MatSnackBar);

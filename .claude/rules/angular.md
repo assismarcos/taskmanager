@@ -7,6 +7,13 @@ paths:
 
 - Angular CLI 21 is a project dependency: run it with `npm run …` or `npx ng …` inside `frontend/`. Never use the global `ng` (17.3.8, a different version), never `npm install -g`, never change the Node version (22.22.0).
 - Angular 21 (not 22: every Angular 22 release needs Node ≥ 22.22.3), standalone components, zoneless. Every component uses `ChangeDetectionStrategy.OnPush` and `inject()` (no constructor injection).
+- One folder per component with these files:
+  - `name/name.component.ts`: the logic, class `NameComponent`.
+  - `name.component.html`: the template, referenced by `templateUrl`.
+  - `name.component.scss`: the styles, referenced by `styleUrl`. Only when the component has styles; delete the empty one the generator creates.
+  - `name.component.spec.ts`: next to them.
+
+  Never inline `template` or `styles`. `npx ng generate component` creates this layout.
 - State: one store per feature, a service with `signal()` / `computed()` and intention-revealing methods. Components read signals and call store methods; `*.api.ts` services only do HTTP. No NgRx.
 - Templates use `@if` / `@for` / `@switch`; every `@for` has a `track` expression.
 - Forms are typed reactive forms. Every field has a `<mat-label>`; validation messages mirror the backend rules in `docs/design/DD-03-frontend.md` section 5.

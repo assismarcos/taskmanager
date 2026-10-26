@@ -2,21 +2,21 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
-import { TaskItem } from '../../core/models/task.model';
-import { TaskFormPage } from './task-form.page';
+import { TaskItem } from '../../../core/models/task.model';
+import { TaskFormComponent } from './task-form.component';
 
 interface FormAccess {
   controls: { dueDate: { setValue(value: Date): void } };
 }
 
-describe('TaskFormPage', () => {
-  let fixture: ComponentFixture<TaskFormPage>;
+describe('TaskFormComponent', () => {
+  let fixture: ComponentFixture<TaskFormComponent>;
   let controller: HttpTestingController;
   let element: HTMLElement;
 
   async function render(id?: string): Promise<void> {
     TestBed.configureTestingModule({
-      imports: [TaskFormPage],
+      imports: [TaskFormComponent],
       providers: [
         provideRouter([]),
         provideHttpClient(),
@@ -28,7 +28,7 @@ describe('TaskFormPage', () => {
       ],
     });
     controller = TestBed.inject(HttpTestingController);
-    fixture = TestBed.createComponent(TaskFormPage);
+    fixture = TestBed.createComponent(TaskFormComponent);
     element = fixture.nativeElement as HTMLElement;
     await fixture.whenStable();
   }

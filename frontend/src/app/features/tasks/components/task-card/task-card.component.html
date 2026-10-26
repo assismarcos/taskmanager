@@ -1,0 +1,19 @@
+<mat-card [class.overdue]="task().isOverdue">
+  <mat-card-header>
+    <mat-card-title>{{ task().title }}</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <app-status-badge [status]="task().status" />
+    @if (task().isOverdue) {
+      <span class="overdue-badge">Overdue</span>
+    }
+    <p>Due {{ dueDate() | date: 'mediumDate' }}</p>
+    @if (task().description) {
+      <p>{{ task().description }}</p>
+    }
+  </mat-card-content>
+  <mat-card-actions>
+    <a mat-button [routerLink]="['/tasks', task().id, 'edit']">Edit</a>
+    <button mat-button type="button" (click)="delete.emit(task())">Delete</button>
+  </mat-card-actions>
+</mat-card>

@@ -1,0 +1,23 @@
+.bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+table {
+  width: 100%;
+}
+.cards {
+  display: grid;
+  gap: 12px;
+}
+.overdue {
+  background: #fff3f3;
+}
+.overdue-badge {
+  margin-left: 8px;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  background: #ffcdd2;
+  color: #b71c1c;
+}

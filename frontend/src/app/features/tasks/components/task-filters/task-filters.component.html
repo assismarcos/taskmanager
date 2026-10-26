@@ -1,0 +1,9 @@
+<mat-form-field appearance="outline">
+  <mat-label>Status</mat-label>
+  <mat-select [value]="status() ?? ''" (selectionChange)="changed.emit($event.value || undefined)">
+    <mat-option value="">All</mat-option>
+    <mat-option value="Todo">To do</mat-option>
+    <mat-option value="InProgress">In progress</mat-option>
+    <mat-option value="Done">Done</mat-option>
+  </mat-select>
+</mat-form-field>

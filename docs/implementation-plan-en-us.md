@@ -427,21 +427,23 @@ frontend/src/app/
 ├── shared/
 │   └── ui/                      # status-badge, confirm-dialog, empty-state, loading
 ├── layout/
-│   └── shell.component.ts       # toolbar + router-outlet
+│   └── shell/                   # toolbar + router-outlet
 └── features/
     ├── auth/
-    │   ├── login.page.ts
-    │   └── register.page.ts
+    │   ├── login/
+    │   └── register/
     └── tasks/
         ├── data-access/
         │   ├── tasks.api.ts     # HTTP only
         │   └── tasks.store.ts   # signal-based state
-        ├── task-list.page.ts
-        ├── task-form.page.ts    # create and edit
+        ├── task-list/
+        ├── task-form/           # create and edit
         └── components/
-            ├── task-card.component.ts
-            └── task-filters.component.ts
+            ├── task-card/
+            └── task-filters/
 ```
+
+Each component folder holds `name.component.ts` (logic), `name.component.html` (template) and, when the component has styles, `name.component.scss`.
 
 State management: one *store* per feature, implemented as a service with `signal()` and `computed()` — no NgRx. `TasksStore` holds `tasks`, `filter`, `loading` and `error`, exposes `load()`, `create()`, `update()` and `remove()`, and components only read signals. `TasksApi` only performs HTTP. The component → store → api separation keeps components and state cleanly organized.
 
