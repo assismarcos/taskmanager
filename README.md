@@ -30,8 +30,10 @@ The first run downloads the base images and packages, which takes a few minutes.
 
 | Email | Password | Data |
 | --- | --- | --- |
-| `demo@taskmanager.local` | `Demo@12345` | 8 tasks in all statuses, 2 of them overdue |
-| `other@taskmanager.local` | `Other@12345` | 2 tasks |
+| `demo@taskmanager.local` | `Demo@12345` | 15 tasks in all statuses, 2 of them overdue |
+| `other@taskmanager.local` | `Other@12345` | 20 tasks, 2 of them overdue |
+
+Both users have two pages of tasks (10 per page).
 
 You can also register a new user. The password needs at least 8 characters, a letter and a digit. The values in `.env.example` are for local demos only.
 
@@ -59,7 +61,7 @@ You can also register a new user. The password needs at least 8 characters, a le
 2. Create a task. A due date in the past is rejected.
 3. Edit a `Done` task. It can only be reopened to `Todo`.
 4. Delete a task. You are asked to confirm first.
-5. Log in as the other user. You only see that user's 2 tasks.
+5. Log in as the other user. You only see that user's 20 tasks.
 6. In Scalar, call `GET /api/tasks` without a token and get 401. Then call `POST /api/auth/login`, paste the `accessToken` in the Bearer field, and call it again to get 200.
 
 ## How the exercise requirements are met

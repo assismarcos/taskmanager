@@ -61,8 +61,8 @@ Demo seed (Development only, idempotent: it does nothing if the demo user alread
 
 | User | Password | Tasks |
 | --- | --- | --- |
-| `demo@taskmanager.local` (Demo User) | `Demo@12345` | 8 tasks, due dates relative to today: 3 `Todo` (one of them overdue), 2 `InProgress` (one overdue), 2 `Done` (one with a past due date, which is not overdue), and 1 `Todo` far in the future |
-| `other@taskmanager.local` (Other User) | `Other@12345` | 2 tasks, used to show that users cannot see each other's tasks |
+| `demo@taskmanager.local` (Demo User) | `Demo@12345` | 15 tasks (two pages), due dates relative to today: 6 `Todo` (one of them overdue), 4 `InProgress` (one overdue), 4 `Done` (one with a past due date, which is not overdue), and 1 `Todo` far in the future |
+| `other@taskmanager.local` (Other User) | `Other@12345` | 20 tasks (two pages, two of them overdue), used to show that users cannot see each other's tasks |
 
 Overdue demo tasks are built with `TaskItem.Create(…, now: a past date)`. This respects the domain invariant (the due date was not in the past when the task was "created") and gives realistic `created_at` values.
 
