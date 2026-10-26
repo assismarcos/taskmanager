@@ -121,10 +121,16 @@ Angular 21, standalone components, Angular Material, Vitest ([DD-03](design/DD-0
 | `core/http` | `errorInterceptor` (401: logout and redirect to login with `returnUrl`; snackbar on network and 5xx errors) |
 | `core/models` | Typed API models |
 | `shared/ui` | Confirm dialog, empty state, loading, status badge |
-| `layout` | `ShellComponent` (toolbar and outlet) |
+| `layout/shell` | `ShellComponent` (toolbar and outlet) |
 | `features/auth` | Login and register pages |
 | `features/tasks` | List, form, task card, filters, API service, `TasksStore` |
 
+- **Component files**: each component has its own folder:
+  - `name.component.ts` holds the logic;
+  - `name.component.html` holds the template;
+  - `name.component.scss` holds the styles, when the component has any.
+
+  For example, `features/tasks/task-list/task-list.component.ts` with its `.html`, `.scss` and `.spec.ts`.
 - **Signal stores**: one injectable store per feature holds state in `signal()` and `computed()`. API services only do HTTP.
 - **Lazy routes**: `tasks` and `auth` are loaded with `loadChildren`.
 - **Guard and interceptors**: `authGuard` protects `/tasks`; `authInterceptor` adds the Bearer token to `/api` calls; `errorInterceptor` logs out and redirects to login with `returnUrl` on 401 and shows a snackbar on network and 5xx errors. The pages map ProblemDetails to field and form errors.

@@ -17,7 +17,7 @@ Let a user register, log in and log out. Protect the task routes, attach the tok
 ## Scope — files you may create or change
 - `frontend/src/app/core/auth/**` (`AuthService`, `TokenStorage`, `authGuard`, `authInterceptor`)
 - `frontend/src/app/core/http/**` (`errorInterceptor`)
-- `frontend/src/app/features/auth/**` (`login.page.ts`, `register.page.ts`, `auth.routes.ts` exporting `AUTH_ROUTES`)
+- `frontend/src/app/features/auth/**` (`login/login.component.*`, `register/register.component.*`, `auth.routes.ts` exporting `AUTH_ROUTES`)
 - `frontend/src/app/layout/**` (user name and logout button in the toolbar)
 
 ## Out of scope
@@ -31,9 +31,9 @@ Let a user register, log in and log out. Protect the task routes, attach the tok
 - `authGuard redirects to /login with returnUrl when not authenticated` (AC-9)
 - `authInterceptor adds the bearer token to /api requests`
 - `errorInterceptor logs out and redirects on 401` (AC-9)
-- `LoginPage shows "Invalid email or password" on 401` (AC-2)
-- `RegisterPage shows a validation message when the password has no digit` (AC-1)
-- `RegisterPage shows the email error on 409` (AC-1)
+- `LoginComponent shows "Invalid email or password" on 401` (AC-2)
+- `RegisterComponent shows a validation message when the password has no digit` (AC-1)
+- `RegisterComponent shows the email error on 409` (AC-1)
 
 ## Definition of done
 - [ ] All tests above written first and seen failing, then passing (`npm test`)

@@ -17,25 +17,33 @@ Layers inside the app: **component → store → api**. Components only read sig
 
 ```text
 frontend/src/app/
+├── app.component.ts / .html            # root component: router-outlet
 ├── app.config.ts / app.routes.ts      # shared files, owned by the orchestrator
 ├── core/auth/                          # AuthService, TokenStorage, authGuard, authInterceptor
 ├── core/http/                          # errorInterceptor
 ├── core/models/                        # types mirroring the API DTOs
-├── shared/ui/                          # status-badge, confirm-dialog, empty-state, loading
-├── layout/                             # shell: toolbar (user name + logout) + router-outlet
+├── shared/ui/                          # status-badge/, confirm-dialog/, empty-state/, loading/
+├── layout/shell/                       # toolbar (user name + logout) + router-outlet
 └── features/
-    ├── auth/   login.page.ts, register.page.ts, auth.routes.ts
-    └── tasks/  data-access/{tasks.api.ts, tasks.store.ts}, task-list.page.ts,
-                task-form.page.ts, components/{task-card, task-filters}, tasks.routes.ts
+    ├── auth/   login/, register/, auth.routes.ts
+    └── tasks/  data-access/{tasks.api.ts, tasks.store.ts}, task-list/, task-form/,
+                components/{task-card/, task-filters/}, tasks.routes.ts
 ```
+
+Each component has its own folder with three kinds of file:
+- `name.component.ts`: the logic, class `NameComponent`;
+- `name.component.html`: the template, referenced by `templateUrl`;
+- `name.component.scss`: the styles, referenced by `styleUrl`, only when the component has styles.
+
+The spec (`name.component.spec.ts`) sits in the same folder. Templates and styles are never inline. `npx ng generate component` creates this layout (`"type": "component"` in `angular.json`).
 
 Routes, all lazy loaded:
 
-| Path | Page | Guard |
+| Path | Component | Guard |
 | --- | --- | --- |
-| `/login`, `/register` | `LoginPage`, `RegisterPage` (`AUTH_ROUTES`) | — |
-| `/tasks` | `TaskListPage` (`TASKS_ROUTES`) | `authGuard` |
-| `/tasks/new`, `/tasks/:id/edit` | `TaskFormPage` (`TASKS_ROUTES`) | `authGuard` |
+| `/login`, `/register` | `LoginComponent`, `RegisterComponent` (`AUTH_ROUTES`) | — |
+| `/tasks` | `TaskListComponent` (`TASKS_ROUTES`) | `authGuard` |
+| `/tasks/new`, `/tasks/:id/edit` | `TaskFormComponent` (`TASKS_ROUTES`) | `authGuard` |
 | `''`, `**` | redirect to `/tasks` | — |
 
 Each feature exports its route array (`auth.routes.ts`, `tasks.routes.ts`). The orchestrator wires them into `app.routes.ts` with `loadChildren`, and registers the interceptors in `app.config.ts`, after each merge. This way no two tasks edit the shared files.
@@ -110,15 +118,15 @@ Vitest (the Angular CLI default) with `TestBed` and `HttpTestingController`. Spe
 | T12 | `ShellComponent renders the toolbar and router outlet`; `app routes redirect unknown paths to /tasks` | — |
 | T24 | `AuthService.login stores the session and sets currentUser`; `AuthService.logout clears the session`; `TokenStorage treats an expired session as empty` | AC-2 |
 | | `authGuard redirects to /login with returnUrl when not authenticated`; `authInterceptor adds the bearer token to /api requests`; `errorInterceptor logs out and redirects on 401` | AC-9 |
-| | `LoginPage shows "Invalid email or password" on 401` | AC-2 |
-| | `RegisterPage shows a validation message when the password has no digit`; `RegisterPage shows the email error on 409` | AC-1 |
+| | `LoginComponent shows "Invalid email or password" on 401` | AC-2 |
+| | `RegisterComponent shows a validation message when the password has no digit`; `RegisterComponent shows the email error on 409` | AC-1 |
 | T34 | `TasksStore.load sets tasks and totalCount`; `TasksStore.setStatusFilter reloads from page 1` | AC-7 |
 | | `TasksStore.remove removes the task after the API confirms` | — |
-| | `TaskFormPage shows a validation message when the title is too short` | AC-4 |
-| | `TaskFormPage blocks a past due date on create` | AC-5 |
-| | `TaskFormPage offers only Done and Todo when editing a Done task` | AC-6 |
-| | `TaskCard shows the overdue badge when isOverdue is true` | AC-8 |
-| | `TaskFormPage maps 400 field errors to form controls` | AC-4, AC-5 |
+| | `TaskFormComponent shows a validation message when the title is too short` | AC-4 |
+| | `TaskFormComponent blocks a past due date on create` | AC-5 |
+| | `TaskFormComponent offers only Done and Todo when editing a Done task` | AC-6 |
+| | `TaskCardComponent shows the overdue badge when isOverdue is true` | AC-8 |
+| | `TaskFormComponent maps 400 field errors to form controls` | AC-4, AC-5 |
 
 ## 7. Risks and open questions
 

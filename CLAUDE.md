@@ -13,7 +13,8 @@ every change must be easy to explain in a code review.
 ## Repository layout
 - `backend/` — `TaskManager.slnx`, `Directory.Build.props`, `Directory.Packages.props`,
   `src/` (Domain, Application, Infrastructure, Api) and `tests/` (six test projects)
-- `frontend/` — Angular 21 app: `src/app/core`, `shared`, `layout`, `features`
+- `frontend/` — Angular 21 app: `src/app/core`, `shared`, `layout`, `features`. One folder per component
+  with `name.component.ts` (logic), `.html` (template) and `.scss` (styles, only if any); never inline them
 - `docs/` — spec, design, adr, tasks, genai
 - `.claude/` — `settings.json` (enforced), `rules/` (path-scoped conventions), `agents/`, `skills/`
 

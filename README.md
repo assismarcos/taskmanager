@@ -116,6 +116,11 @@ The Angular app has four folders:
 - `layout`: the app shell.
 - `features`: auth and tasks.
 
+Each component has its own folder with three kinds of file:
+- `.component.ts`: the logic;
+- `.component.html`: the template;
+- `.component.scss`: the styles, when the component has any.
+
 Diagrams and the request flow are in [docs/architecture.md](docs/architecture.md).
 
 ### Key decisions
