@@ -72,7 +72,7 @@ jobs:
         run: npm run lint
 
       - name: Unit tests
-        run: npm test -- --watch=false
+        run: npm run test:once
 
       - name: Build
         run: npm run build

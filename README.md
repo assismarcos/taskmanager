@@ -175,8 +175,8 @@ dotnet test backend/TaskManager.slnx --filter "Category!=Integration"
 # All backend tests (Docker must be running: Testcontainers starts PostgreSQL)
 dotnet test backend/TaskManager.slnx
 
-# Frontend
-cd frontend && npm ci && npm test
+# Frontend (`npm test` instead runs in watch mode)
+cd frontend && npm ci && npm run test:once
 ```
 
 Other checks:
