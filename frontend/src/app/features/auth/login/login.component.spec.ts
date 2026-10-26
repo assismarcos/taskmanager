@@ -3,13 +3,13 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
-import { LoginPage } from './login.page';
+import { LoginComponent } from './login.component';
 
 @Component({ template: '' })
 class DummyPage {}
 
-describe('LoginPage', () => {
-  let fixture: ComponentFixture<LoginPage>;
+describe('LoginComponent', () => {
+  let fixture: ComponentFixture<LoginComponent>;
   let controller: HttpTestingController;
   let router: Router;
   let element: HTMLElement;
@@ -17,7 +17,7 @@ describe('LoginPage', () => {
   async function render(returnUrl?: string): Promise<void> {
     sessionStorage.clear();
     TestBed.configureTestingModule({
-      imports: [LoginPage],
+      imports: [LoginComponent],
       providers: [
         provideRouter([
           { path: 'login', component: DummyPage },
@@ -30,7 +30,7 @@ describe('LoginPage', () => {
     router = TestBed.inject(Router);
     controller = TestBed.inject(HttpTestingController);
     await router.navigate(['/login'], { queryParams: returnUrl ? { returnUrl } : {} });
-    fixture = TestBed.createComponent(LoginPage);
+    fixture = TestBed.createComponent(LoginComponent);
     element = fixture.nativeElement as HTMLElement;
     await fixture.whenStable();
   }

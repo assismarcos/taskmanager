@@ -1,0 +1,60 @@
+<header class="bar">
+  <h1>Tasks</h1>
+  <a mat-flat-button routerLink="/tasks/new">New task</a>
+</header>
+<app-task-filters [status]="store.status()" (changed)="store.setStatusFilter($event)" />
+
+@if (store.loading()) {
+  <app-loading />
+} @else if (store.error()) {
+  <app-empty-state message="Could not load your tasks.">
+    <button mat-button type="button" (click)="store.load()">Retry</button>
+  </app-empty-state>
+} @else if (store.tasks().length === 0) {
+  <app-empty-state message="No tasks here yet." />
+} @else if (handset()) {
+  <div class="cards">
+    @for (task of store.tasks(); track task.id) {
+      <app-task-card [task]="task" (delete)="confirmDelete($event)" />
+    }
+  </div>
+} @else {
+  <table mat-table [dataSource]="store.tasks()">
+    <ng-container matColumnDef="title">
+      <th mat-header-cell *matHeaderCellDef>Title</th>
+      <td mat-cell *matCellDef="let task">{{ task.title }}</td>
+    </ng-container>
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef>Status</th>
+      <td mat-cell *matCellDef="let task">
+        <app-status-badge [status]="task.status" />
+        @if (task.isOverdue) {
+          <span class="overdue-badge">Overdue</span>
+        }
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="dueDate">
+      <th mat-header-cell *matHeaderCellDef>Due</th>
+      <td mat-cell *matCellDef="let task">
+        {{ localDate(task.dueDate) | date: 'mediumDate' }}
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let task">
+        <a mat-button [routerLink]="['/tasks', task.id, 'edit']">Edit</a>
+        <button mat-button type="button" (click)="confirmDelete(task)">Delete</button>
+      </td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="columns"></tr>
+    <tr mat-row *matRowDef="let row; columns: columns" [class.overdue]="row.isOverdue"></tr>
+  </table>
+}
+
+<mat-paginator
+  [length]="store.totalCount()"
+  [pageIndex]="store.page() - 1"
+  [pageSize]="store.pageSize()"
+  [pageSizeOptions]="[10, 20, 50]"
+  (page)="onPage($event)"
+/>

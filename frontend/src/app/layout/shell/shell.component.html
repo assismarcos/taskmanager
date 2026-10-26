@@ -1,0 +1,11 @@
+<mat-toolbar>
+  <a class="brand" routerLink="/tasks">Task Manager</a>
+  <span class="spacer"></span>
+  @if (auth.currentUser(); as user) {
+    <span class="user-name">{{ user.name }}</span>
+    <button mat-button type="button" class="logout" (click)="logout()">Log out</button>
+  }
+</mat-toolbar>
+<main class="content">
+  <router-outlet />
+</main>

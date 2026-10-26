@@ -1,12 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { TaskItem } from '../../../core/models/task.model';
-import { TaskCard } from './task-card';
+import { TaskItem } from '../../../../core/models/task.model';
+import { TaskCardComponent } from './task-card.component';
 
-describe('TaskCard', () => {
+describe('TaskCardComponent', () => {
   function render(isOverdue: boolean): HTMLElement {
     TestBed.configureTestingModule({ providers: [provideRouter([])] });
-    const fixture = TestBed.createComponent(TaskCard);
+    const fixture = TestBed.createComponent(TaskCardComponent);
     const task: TaskItem = {
       id: 't1',
       title: 'Prepare the demo',

@@ -4,13 +4,13 @@ import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { provideRouter, Router } from '@angular/router';
-import { RegisterPage } from './register.page';
+import { RegisterComponent } from './register.component';
 
 @Component({ template: '' })
 class DummyPage {}
 
-describe('RegisterPage', () => {
-  let fixture: ComponentFixture<RegisterPage>;
+describe('RegisterComponent', () => {
+  let fixture: ComponentFixture<RegisterComponent>;
   let controller: HttpTestingController;
   let router: Router;
   let element: HTMLElement;
@@ -18,14 +18,14 @@ describe('RegisterPage', () => {
   beforeEach(async () => {
     sessionStorage.clear();
     TestBed.configureTestingModule({
-      imports: [RegisterPage],
+      imports: [RegisterComponent],
       providers: [
         provideRouter([{ path: 'login', component: DummyPage }]),
         provideHttpClient(),
         provideHttpClientTesting(),
       ],
     });
-    fixture = TestBed.createComponent(RegisterPage);
+    fixture = TestBed.createComponent(RegisterComponent);
     controller = TestBed.inject(HttpTestingController);
     router = TestBed.inject(Router);
     element = fixture.nativeElement as HTMLElement;
